@@ -1,3 +1,7 @@
+# arduino serial connection
+
+# turn off serial in sudo raspi-config to prevent serial data being sent to arduino during startup
+
 # pi_webserver
 
 # sudo apt-get install mysql-server
