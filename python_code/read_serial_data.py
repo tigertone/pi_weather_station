@@ -5,7 +5,7 @@ import time
 arduino = serial.Serial('/dev/ttyACM0', 115200, timeout = 1)
 
 # Connect to MySQL
-db = MySQLdb.connect(host="localhost", user="root",passwd="password", db="weather_records")
+db = MySQLdb.connect(host="localhost", user="database_writer",passwd="PASSWORD", db="weather_records")
 cur = db.cursor()
 
 while 1:
