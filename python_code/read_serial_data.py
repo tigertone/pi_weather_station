@@ -31,3 +31,7 @@ while 1:
 
         cur.close()
         db.close()
+
+# mysql -u root -p
+# USE weather_records;
+# mysql> SELECT * FROM sensor_readings;
