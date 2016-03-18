@@ -18,7 +18,7 @@ while 1:
         
         datetime = (time.strftime("%Y-%m-%d ") + time.strftime("%H:%M:%S"))
         
-        query = """INSERT INTO sensor_readings (datetime,decidegrees,pressure,humidity) VALUES (%s,%s,%s,%s)""",(datetime,temp,pressure,humidity)
+        query = """INSERT INTO sensor_data (datetime,decidegrees,pressure,humidity) VALUES (%s,%s,%s,%s)""",(datetime,temp,pressure,humidity)
         print query
         
         try:
