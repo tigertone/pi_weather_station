@@ -22,6 +22,9 @@
 # CREATE TABLE sensor_data(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegrees SMALLINT, pressure SMALLINT, humidity TINYINT UNSIGNED, PRIMARY KEY (ID));
 
 # CREATE USER 'database_writer'@'localhost' IDENTIFIED BY 'PASSWORD';
-# GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'
+# GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost';
 # FLUSH PRIVILEGES;
 #quit
+
+# to view table
+# select * from sensor_data;
