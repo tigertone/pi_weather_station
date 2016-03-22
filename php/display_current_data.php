@@ -35,7 +35,7 @@ $decidegrees = mysqli_fetch_row($tmp_result)
 mysqli_free_result($tmp_result);
 mysqli_close($conn);
 $temp = $decidegrees[0] / 10;
-echo "Temp: " . $temp. "<br>";
+echo "Temp: " . $temp. &degC. "<br>";
 ?>  
 
 </body>
