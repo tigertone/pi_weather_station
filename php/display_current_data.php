@@ -4,9 +4,9 @@
 
 <?php
 $servername = "localhost";
-$username = "username";
-$password = "password";
-$dbname = "myDB";
+$username = "database_reader";
+$password = "PASSWORD";
+$dbname = "weather_records";
 
 // Create connection
 $conn = mysqli_connect($servername, $username, $password, $dbname);
@@ -15,19 +15,15 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-$sql = "SELECT id, firstname, lastname FROM MyGuests";
-$result = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-        echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
-    }
-} else {
-    echo "0 results";
-}
-
+# $currentDate = date("Y-m-d H:i:s")
+# $startDate = date_sub($currentDate, DateInterval('24h'));
+$sql = "SELECT LAST(decidegrees) FROM sensor_data";
+$tmp_result = mysqli_query($conn, $sql);
+$decidegrees = mysqli_fetch_row($tmp_result)
+mysqli_free_result($tmp_result);
 mysqli_close($conn);
+$temp = $decidegrees[0] / 10;
+echo "Temp: " . $temp. "<br>";
 ?>  
 
 </body>
