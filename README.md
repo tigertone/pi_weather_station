@@ -28,3 +28,10 @@
 
 # to view table
 # select * from sensor_data;
+
+
+# CREATE USER 'database_reader'@'localhost' IDENTIFIED BY 'PASSWORD';
+# GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost';
+# FLUSH PRIVILEGES;
+#quit
+
