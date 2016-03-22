@@ -1,5 +1,15 @@
 <!DOCTYPE html>
 <html>
+<head>
+<style>
+body {
+    background-color: #008000;
+    color: white;
+    text-align: center;
+}
+</style>
+</head>
+
 <body>
 
 <?php
@@ -17,7 +27,7 @@ if (!$conn) {
 
 # $currentDate = date("Y-m-d H:i:s")
 # $startDate = date_sub($currentDate, DateInterval('24h'));
-$sql = "SELECT LAST(decidegrees) FROM sensor_data";
+$sql = "SELECT decidegrees FROM sensor_data ORDER BY ID DESC LIMIT 1";
 $tmp_result = mysqli_query($conn, $sql);
 $decidegrees = mysqli_fetch_row($tmp_result)
 mysqli_free_result($tmp_result);
