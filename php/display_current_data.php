@@ -39,7 +39,7 @@ $humidity_current = $tmp_data[3];
 $temp_current = $decidegrees_current / 10;
 
 // Get the current days high/low values
-$sql = "SELECT MAX(decidegrees), MIN(decidegrees), MAX(pressure), MIN(pressure), MAX(humidity), MIN(humidity) FROM sensor_data WHERE GMT = DATE(NOW())";
+$sql = "SELECT MAX(decidegrees), MIN(decidegrees), MAX(pressure), MIN(pressure), MAX(humidity), MIN(humidity) FROM sensor_data WHERE DATE(GMT) = CURDATE()";
 $result = mysqli_query($conn, $sql);
 $tmp_data = mysqli_fetch_row($result);
 mysqli_free_result($result);
@@ -47,7 +47,7 @@ mysqli_close($conn);
 $decidegrees_high = $tmp_data[0];
 $decidegrees_low = $tmp_data[1];
 $pressure_high = $tmp_data[2];
-$pressure_low = $tmp_data[3];
+$prressure_low = $tmp_data[3];
 $humidity_high = $tmp_data[4];
 $humidity_low = $tmp_data[5];
 $temp_high = $decidegrees_high / 10;
