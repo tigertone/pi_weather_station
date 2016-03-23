@@ -47,7 +47,7 @@ mysqli_close($conn);
 $decidegrees_high = $tmp_data[0];
 $decidegrees_low = $tmp_data[1];
 $pressure_high = $tmp_data[2];
-$pressure_low = $tmp_data[3;
+$pressure_low = $tmp_data[3];
 $humidity_high = $tmp_data[4];
 $humidity_low = $tmp_data[5];
 $temp_high = $decidegrees_high / 10;
