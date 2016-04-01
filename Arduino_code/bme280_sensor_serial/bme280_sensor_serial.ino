@@ -73,6 +73,7 @@ int16_t dig_H5;
 uint8_t dig_H6;
 
 uint8_t dataToWrite;
+int32_t t_fine;
 
 
 
@@ -129,6 +130,7 @@ void setup()
 
 void loop() 
 {
+  // need to calc temp first so can be used to compensate other values
   int temp = readTempC();
   byte humidity = readFloatHumidity();
   int pressure = readFloatPressure();
@@ -149,7 +151,6 @@ void loop()
 int readFloatPressure( void )
 {
 
-  int32_t t_fine;
   // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8 fractional bits).
   // Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
   int32_t adc_P = ((uint32_t)readRegister(PRESSURE_MSB_REG) << 12) | ((uint32_t)readRegister(PRESSURE_LSB_REG) << 4) | ((readRegister(PRESSURE_XLSB_REG) >> 4) & 0x0F);
@@ -184,7 +185,6 @@ int readFloatPressure( void )
 //****************************************************************************//
 byte readFloatHumidity( void )
 {
-  int32_t t_fine;
   
   // Returns humidity in %RH as unsigned 32 bit integer in Q22. 10 format (22 integer and 10 fractional bits).
   // Output value of “47445” represents 47445/1024 = 46. 333 %RH
@@ -214,7 +214,6 @@ byte readFloatHumidity( void )
 int readTempC( void )
 {
   // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
-  int32_t t_fine;
 
   //get the reading (adc_T);
   int32_t adc_T = ((uint32_t)readRegister(TEMPERATURE_MSB_REG) << 12) | ((uint32_t)readRegister(TEMPERATURE_LSB_REG) << 4) | ((readRegister(TEMPERATURE_XLSB_REG) >> 4) & 0x0F);
