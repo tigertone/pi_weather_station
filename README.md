@@ -35,6 +35,6 @@
 # FLUSH PRIVILEGES;
 #quit
 
-cd /var/www/html /n
-sudo rm index.html /n
-sudo nano display_current_data.php /n
+cd /var/www/html <br>
+sudo rm index.html <br>
+sudo nano display_current_data.php <br>
