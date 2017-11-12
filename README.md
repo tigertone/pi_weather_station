@@ -35,6 +35,6 @@
 # FLUSH PRIVILEGES;
 #quit
 
-pi@raspberrypi:~ $ cd /var/www/html 
-sudo rm index.html 
-sudo nano display_current_data.php
+cd /var/www/html /n
+sudo rm index.html /n
+sudo nano display_current_data.php /n
