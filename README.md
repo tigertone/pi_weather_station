@@ -15,7 +15,7 @@
 #    Select apache2 webserver
 
 # Open MySQL
-# sudo mysql –u –p
+# ssudo mysql -p
 # CREATE DATABASE weather_records;
 # USE weather_records;
 
