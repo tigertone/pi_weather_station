@@ -11,9 +11,9 @@ sudo apt-get install phpmyadmin <br>
  - Select apache2 webserver <br>
 
 # Open MySQL
-# sudo mysql -p <br>
-# CREATE DATABASE weather_records; <br>
-# USE weather_records; <br>
+sudo mysql -p <br>
+CREATE DATABASE weather_records; <br>
+USE weather_records; <br>
 
 CREATE TABLE sensor_data(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegrees SMALLINT, pressure SMALLINT, humidity TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
 
