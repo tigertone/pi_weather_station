@@ -30,6 +30,10 @@ if (!$conn) {
 // Get most recent data
 $sql = "SELECT GMT, decidegrees, pressure, humidity FROM sensor_data ORDER BY ID DESC LIMIT 1";
 $result = mysqli_query($conn, $sql);
+    
+$row_cnt = mysqli_num_rows($result);
+
+    if ($row_cnt != 0) {
 $tmp_data = mysqli_fetch_row($result);
 mysqli_free_result($result);
 $GMT_time = $tmp_data[0];
@@ -64,6 +68,11 @@ echo "(" . $pressure_low . " - " . $pressure_high . ")<br><br>";
 
 echo "Humidity: " . $humidity_current . "&#37<br>";
 echo "(" . $humidity_low . " - " . $humidity_high . ")<br><br>";
+        
+    } else {
+        echo "No entries in database";
+    }
+        
 ?>  
 
 </body>
