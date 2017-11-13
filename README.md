@@ -1,8 +1,7 @@
 # arduino serial connection
-
 turn off serial in sudo raspi-config to prevent serial data being sent to arduino during startup <br>
 
-# pi_webserver
+# Pi webserver
 sudo apt-get install mysql-server <br>
 sudo apt-get install python-mysqldb <br>
 
@@ -24,10 +23,10 @@ GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost'; <br>
 FLUSH PRIVILEGES; <br>
 quit <br>
 
-# to view table
+# To view table
 select * from sensor_data; <br>
 
-
+# Copy php file so that it can be found by apache
 cd /var/www/html <br>
 sudo rm index.html <br>
 sudo nano display_current_data.php <br>
