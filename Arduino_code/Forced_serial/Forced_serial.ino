@@ -15,41 +15,36 @@
   BSD license, all text above must be included in any redistribution
  ***************************************************************************/
 
-// #include <Wire.h>
-#include <SPI.h>
+#include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-#define BME_SCK 13
-#define BME_MISO 12
-#define BME_MOSI 11
-#define BME_CS 10
 
-//Adafruit_BME280 bme; // I2C
-Adafruit_BME280 bme(BME_CS); // hardware SPI
-//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
+Adafruit_BME280 bme; // I2C
 
+unsigned long delayTime;
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(9600);
 
-    
-      status = bme.begin();  
-    if (!status) {
+    if (! bme.begin(&Wire1)) {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
         while (1);
     }
   
-  
-    // For more details on the following scenarious, see chapter
-    // 3.5 "Recommended modes of operation" in the datasheet
+
+    // weather monitoring
     bme.setSampling(Adafruit_BME280::MODE_FORCED,
                     Adafruit_BME280::SAMPLING_X1, // temperature
                     Adafruit_BME280::SAMPLING_X1, // pressure
                     Adafruit_BME280::SAMPLING_X1, // humidity
                     Adafruit_BME280::FILTER_OFF   );
+                      
+    // suggested rate is 1/60Hz (1m)
+    delayTime = 60000; // in milliseconds
 
 }
+
 
 
 void loop() {
