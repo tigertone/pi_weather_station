@@ -22,8 +22,6 @@
 
 Adafruit_BME280 bme; // I2C
 
-unsigned long delayTime;
-
 void setup() {
     Serial.begin(9600);
 
@@ -39,9 +37,6 @@ void setup() {
                     Adafruit_BME280::SAMPLING_X1, // pressure
                     Adafruit_BME280::SAMPLING_X1, // humidity
                     Adafruit_BME280::FILTER_OFF   );
-                      
-    // suggested rate is 1/60Hz (1m)
-    delayTime = 60000; // in milliseconds
 
 }
 
@@ -57,10 +52,8 @@ void loop() {
   Serial.println(bme.readTemperature()*10);
   Serial.println(bme.readHumidity());
   Serial.println(bme.readPressure() / 100.0F);
-  
-  
-  
-    delay(5000);
+
+  delay(5000);
 }
 
     
