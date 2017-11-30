@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# can change to python3 when ready
+# chmod +x read_serial_data.py
+
 import serial
 import MySQLdb
 import time
