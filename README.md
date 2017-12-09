@@ -3,7 +3,7 @@ turn off serial in sudo raspi-config to prevent serial data being sent to arduin
 
 # Pi webserver
 sudo apt-get install mysql-server <br>
-sudo apt-get install python-mysqldb <br>
+sudo apt-get install python3-mysqldb <br>
 
 sudo apt-get install apache2 libapache2-mod-php7.0 <br>
 
