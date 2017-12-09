@@ -5,9 +5,7 @@ turn off serial in sudo raspi-config to prevent serial data being sent to arduin
 sudo apt-get install mysql-server <br>
 sudo apt-get install python-mysqldb <br>
 
-sudo apt-get install apache2 php5 libapache2-mod-php5 <br>
-sudo apt-get install phpmyadmin <br>
- - Select apache2 webserver <br>
+sudo apt-get install apache2 libapache2-mod-php7.0 <br>
 
 # Open MySQL
 sudo mysql -p <br>
