@@ -28,3 +28,8 @@ select * from sensor_data; <br>
 cd /var/www/html <br>
 sudo rm index.html <br>
 sudo nano display_current_data.php <br>
+
+
+
+Install latest version of node.js
+npm install chart.js --save
