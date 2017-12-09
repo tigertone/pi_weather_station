@@ -23,9 +23,9 @@
 Adafruit_BME280 bme; // I2C
 
 void setup() {
-    Serial.begin(57600);
+    Serial.begin(9600);
 
-    if (! bme.begin(&Wire1)) {
+    if (! bme.begin()) {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
         while (1);
     }
@@ -51,7 +51,7 @@ void loop() {
   Serial.println("start");
   Serial.println(bme.readTemperature()*10.0F,0);
   Serial.println(bme.readHumidity(),0);
-  Serial.println(bme.readPressure() / 100.0F,0);
+  Serial.println(bme.readPressure() / 100.0F, 0);
 
   delay(5000);
 }
