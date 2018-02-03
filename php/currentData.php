@@ -9,7 +9,28 @@
 
 <body>
 
-    <?php $servername="localhost" ; $username="database_reader" ; $password="PASSWORD" ; $dbname="weather_records" ; // Create connection $conn=m ysqli_connect($servername, $username, $password, $dbname); // Check connection if (!$conn) { die( "Connection failed: " . mysqli_connect_error()); } // Get most recent data // $sql="SELECT date_format(GMT,\" %T\ ") as GMT, decidegrees FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY)"; $sql="SELECT GMT, decidegrees, pressure, humidity FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod 100 = 0" ; $result=m ysqli_query($conn, $sql) or die(mysqli_error($conn)); if (mysqli_num_rows($result)> 0) { $weatherData = (mysqli_fetch_all($result, MYSQLI_ASSOC)); // $temp = json_encode($weatherData); $temp = json_encode(array_column($weatherData, 'decidegrees')); $GMT = json_encode(array_column($weatherData, 'GMT')); $pressure =json_encode(array_column($weatherData, 'pressure')); $humidity = json_encode(array_column($weatherData, 'humidity')); } else { echo "no results found"; } mysqli_close($conn); ?>
+    <?php $servername="localhost" ; $username="database_reader" ; $password="PASSWORD" ; $dbname="weather_records" ;
+// Create connection
+$conn=mysqli_connect($servername, $username, $password, $dbname); 
+
+// Check connection
+if (!$conn) { 
+die( "Connection failed: " . mysqli_connect_error()); 
+} 
+// Get most recent data
+// $sql="SELECT date_format(GMT,\" %T\ ") as GMT, decidegrees FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY)";
+$sql="SELECT GMT, decidegrees, pressure, humidity FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod 100 = 0" ;
+$result=mysqli_query($conn, $sql) or die(mysqli_error($conn)); 
+if (mysqli_num_rows($result)> 0) {
+$weatherData = (mysqli_fetch_all($result, MYSQLI_ASSOC));
+// $temp = json_encode($weatherData);
+$temp = json_encode(array_column($weatherData, 'decidegrees'));
+$GMT = json_encode(array_column($weatherData, 'GMT'));
+$pressure =json_encode(array_column($weatherData, 'pressure'));
+$humidity = json_encode(array_column($weatherData, 'humidity'));
+} 
+else { echo "no results found"; }
+mysqli_close($conn); ?>
 
     <div>
         <canvas id="canvasTemp" width="500" height="200"></canvas>
@@ -25,8 +46,9 @@
 
 
 
-    <script src="/Chart.bundle.min.js">
-    </script>
+<script src="/Chart.bundle.min.js">
+
+</script>
 
 
 
@@ -206,7 +228,7 @@
         };
     </script>
 
-    <a href="graph_annual_data.php">Annual data</a>
+    <a href="annualData.php">Annual data</a>
 
 
 </body>
