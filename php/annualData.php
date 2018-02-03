@@ -86,7 +86,7 @@ echo PHP_EOL;
     var maxTemp = JSON.parse( '<?php echo $maxTemp; ?>' );
     maxTemp = maxTemp.map(function(x){return x / 10;});
    var minTemp = JSON.parse( '<?php echo $minTemp; ?>' );
-    minTemp = maxTemp.map(function(x){return x / 10;});
+    minTemp = minTemp.map(function(x){return x / 10;});
     var GMT = JSON.parse( '<?php echo $GMT; ?>' );
     var maxPressure = JSON.parse( '<?php echo $maxPressure; ?>' );
     var minPressure = JSON.parse( '<?php echo $minPressure; ?>' );
@@ -296,7 +296,7 @@ new Chart(ctx, config)
 
   </script>
 
-<a href="graph_current_data.php">Current data</a>
+<a href="currentData.php">Current data</a>
 
 
  </body> </html>
