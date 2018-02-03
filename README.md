@@ -14,6 +14,8 @@ USE weather_records; <br>
 
 CREATE TABLE sensor_data(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegrees SMALLINT, pressure SMALLINT, humidity TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
 
+create index by_GMT on sensor_data (GMT);<br>
+
 CREATE USER 'database_writer'@'localhost' IDENTIFIED BY 'PASSWORD'; <br>
 GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'; <br>
 CREATE USER 'database_reader'@'localhost' IDENTIFIED BY 'PASSWORD'; <br>
