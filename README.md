@@ -15,13 +15,10 @@ USE weather_records; <br>
 CREATE TABLE sensor_data(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegrees SMALLINT, pressure SMALLINT, humidity TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
 
 create index by_GMT on sensor_data (GMT);<br>
-ords]> CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMEN
-T, date DATE NOT NULL, decidegreesLow SMALLINT, d
-ecidegreesHigh SMALLINT, pressureLow SMALLINT UNS
-IGNED, pressureHigh SMALLINT UNSIGNED, humidityLo
-w TINYINT UNSIGNED, humidityHigh TINYINT UNSIGNED
-, PRIMARY KEY (ID));       
 
+CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, date DATE NOT NULL, decidegreesLow SMALLINT, decidegreesHigh SMALLINT, pressureLow SMALLINT UNSIGNED, pressureHigh SMALLINT UNSIGNED, humidityLow TINYINT UNSIGNED, humidityHigh TINYINT UNSIGNED, PRIMARY KEY (ID));       
+
+create index by_date on dailyExtremes (date);
 
 CREATE USER 'database_writer'@'localhost' IDENTIFIED BY 'PASSWORD'; <br>
 GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'; <br>
