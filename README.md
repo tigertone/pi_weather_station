@@ -21,7 +21,8 @@ CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sample
 create index by_date on dailyExtremes (sampledDate);
 
 # If adding data at a later date
-INSERT INTO dailyExtremes (sampledDate, decidegreesLow, decidegreesHigh,pressureLow,pressureHigh,humidityLow,humidityHigh) SELECT DATE(GMT) as day, max(decidegrees) as maxTemp, MIN(decidegrees) as minTemp, max(Pressure) as maxPressure, MIN(Pressure) as minPressure, max(Humidity) as maxHumidity, MIN(Humidity) as minHumidity from sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 YEAR) group by day;
+INSERT INTO dailyExtremes (sampledDate, decidegreesHigh, decidegreesLow,pressureHigh,pressureLow,humidityHigh,humidityLow) SELECT DATE(GMT) as day, max(decidegrees) as maxTemp, MIN(decidegrees) as minTemp, max(Pressure) as maxPressure, MIN(Pressure) as minPressure, max(Humidity) as maxHumidity, MIN(Humidity) as minHumidity from sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 YEAR) group by day;
+
 
 
 CREATE USER 'database_writer'@'localhost' IDENTIFIED BY 'PASSWORD'; <br>
