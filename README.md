@@ -7,6 +7,14 @@ sudo apt-get install python3-mysqldb <br>
 
 sudo apt-get install apache2 libapache2-mod-php7.0 php-mysqli <br>
 
+
+# Clone git repo
+
+then change working directory for apache2 (/var/www/html to php folder of repo) in 2 locations... <br>
+sudo nano /etc/apache2/sites-available/000-default.conf <br>
+udo nano /etc/apache2/apache2.conf <br>
+ 
+
 # Open MySQL
 sudo mysql -p <br>
 CREATE DATABASE weather_records; <br>
