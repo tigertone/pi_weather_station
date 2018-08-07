@@ -22,26 +22,22 @@ if (!$conn) {
 }
 
 // Get most recent data
-// $sql = "SELECT date_format(GMT,\"%T\") as GMT, decidegrees FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY)";
-$time_start = microtime(true);
-echo (microtime(true)-$time_start);
-echo PHP_EOL;
-$sql = "select date(GMT) as day, max(decidegrees) as maxTemp, MIN(decidegrees) as minTemp, max(Pressure) as maxPressure, MIN(Pressure) as minPressure, max(Humidity) as maxHumidity, MIN(Humidity) as minHumidity from sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 YEAR) group by day";
+$sql = "select * FROM dailyExtremes WHERE sampledDate > DATE_SUB(NOW(), INTERVAL 1 YEAR)";
 $result = mysqli_query($conn, $sql)  or die(mysqli_error($conn));
-echo (microtime(true)-$time_start);
-echo PHP_EOL;
+
 if (mysqli_num_rows($result) > 0)
 {
    $weatherData = (mysqli_fetch_all($result, MYSQLI_ASSOC));
+
 //   $temp = json_encode($weatherData);
 
-   $maxTemp = json_encode(array_column($weatherData, 'maxTemp'));
-   $minTemp = json_encode(array_column($weatherData, 'minTemp'));
-   $GMT = json_encode(array_column($weatherData, 'day'));
-   $maxPressure = json_encode(array_column($weatherData, 'maxPressure'));
-   $minPressure = json_encode(array_column($weatherData, 'minPressure'));
-   $maxHumidity = json_encode(array_column($weatherData, 'maxHumidity'));
-   $minHumidity = json_encode(array_column($weatherData, 'minHumidity'));
+   $maxTemp = json_encode(array_column($weatherData, 'decidegreesHigh'));
+   $minTemp = json_encode(array_column($weatherData, 'decidegreesLow'));
+   $GMT = json_encode(array_column($weatherData, 'sampledDate'));
+   $maxPressure = json_encode(array_column($weatherData, 'pressureHigh'));
+   $minPressure = json_encode(array_column($weatherData, 'pressureLow'));
+   $maxHumidity = json_encode(array_column($weatherData, 'humidityHigh'));
+   $minHumidity = json_encode(array_column($weatherData, 'humidityLow'));
 
 //   $pressure =json_encode(array_column($weatherData, 'pressure'));
 //   $humidity = json_encode(array_column($weatherData, 'humidity'));
@@ -53,8 +49,8 @@ else
 
 
 mysqli_close($conn);
-echo (microtime(true)-$time_start);  
-echo PHP_EOL;
+//echo (microtime(true)-$time_start);  
+//echo PHP_EOL;
 ?>
 
 <div>
