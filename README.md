@@ -50,5 +50,7 @@ sudo nano display_current_data.php <br>
 
 
 
-Install latest version of node.js
-npm install chart.js --save
+# Install latest version of node.js
+npm install chart.js --save<br>
+cp ./node_modules/chart.js/dist/Chart.bundle.js ./pi_weather_station/php/chartJs_2.7.2		% Copy to php folder<br>
+cp ./node_modules/chart.js/dist/Chart.bundle.min.js ./pi_weather_station/php/chartJs_2.7.2<br>

@@ -75,9 +75,14 @@
         </canvas>
       </div>
     </div>
-    <script src="/Chart.bundle.min.js">
+     
+     <div>
+     </div>
+
+    <script src="/chartJs_2.7.2/Chart.bundle.min.js">
     </script>
-    <script>
+    
+<script>
       Chart.defaults.global.legend.display = false;
       Chart.defaults.global.tooltips.enabled = false;
       Chart.defaults.global.maintainAspectRatio = false;
@@ -252,7 +257,7 @@ chartHumidity.update();
 		};
 }
 
-		xmlhttp.open("GET","getData.php?q="+tabName, true);
+		xmlhttp.open("GET","getData.php?dataRange="+tabName+"&resamplingInterval="+Math.ceil((60*24)/(window.innerWidth*.9)), true);
         	xmlhttp.send();
 
 }
@@ -262,7 +267,7 @@ chartHumidity.update();
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 
-
 </script> 
   </body> 
 </html> 
+
