@@ -19,9 +19,9 @@ while 1:
                 temp = int(arduino.readline().strip().decode('ascii'))
                 humidity = int(arduino.readline().strip().decode('ascii'))
                 pressure = int(arduino.readline().strip().decode('ascii'))
-                GMT_datetime = datetime.now()
-                GMT_date = GMT_datetime.strftime("%Y-%m-%d ")
-                datetime_str = GMT_date + GMT_datetime.strftime("%H:%M:%S")
+                local_datetime = datetime.now()
+                local_date = local_datetime.strftime("%Y-%m-%d ")
+                local_datetime_str = local_date + local_datetime.strftime("%H:%M:%S")
 
                 try:
                     # Connect to MySQL
@@ -29,7 +29,7 @@ while 1:
                     cur = db.cursor()
 
                     try:
-                        query = """INSERT INTO sensor_data (GMT,decidegrees,pressure,humidity) VALUES(%s,%s,%s,%s)""",(datetime_str,temp,pressure,humidity)
+                        query = """INSERT INTO sensor_data (GMT,decidegrees,pressure,humidity) VALUES(%s,%s,%s,%s)""",(local_datetime_str,temp,pressure,humidity)
                         cur.execute(*query)
                         db.commit()
                     except Exception as e:
@@ -37,7 +37,7 @@ while 1:
                         db.rollback()
 
                     try:
-                        query = """SELECT ID, sampledDate, decidegreesHigh, decidegreesLow, humidityHigh, humidityLow, pressureHigh, pressureLow FROM dailyExtremes ORDER BY ID  DESC LIMIT 1;"""
+                        query = """SELECT ID, sampledDate, decidegreesHigh, decidegreesLow, humidityHigh, humidityLow, pressureHigh, pressureLow FROM dailyExtremes WHERE sampledDate = CURDATE();"""
                         cur.execute(query)
                        
                         if cur.rowcount>0:
@@ -51,13 +51,12 @@ while 1:
                             pressureHigh = results[6]
                             pressureLow = results[7]
 
-                        if 'sampledDate' in locals():
-                            sampledDate.strftime("%Y-%m-%d ") == GMT_date and (temp>tempHigh or temp<tempLow or humidity>humidityHigh or humidity<humidityLow or pressure>pressureHigh or pressure<pressureLow)
-                            query = """UPDATE dailyExtremes SET decidegreesHigh=GREATEST(%s,%s),decidegreesLow=LEAST(%s,%s),pressureHigh=GREATEST(%s,%s),pressureLow=LEAST(%s,%s),humidityHigh=GREATEST(%s,%s),humidityLow=LEAST(%s,%s) WHERE ID=%s""",(temp,tempHigh,temp,tempLow,pressure,pressureHigh,pressure,pressureLow,humidity,humidityHigh,humidity,humidityLow,id)
-                            cur.execute(*query)
-                            db.commit()
+                            if (temp>tempHigh or temp<tempLow or humidity>humidityHigh or humidity<humidityLow or pressure>pressureHigh or pressure<pressureLow):
+                                query = """UPDATE dailyExtremes SET decidegreesHigh=GREATEST(%s,%s),decidegreesLow=LEAST(%s,%s),pressureHigh=GREATEST(%s,%s),pressureLow=LEAST(%s,%s),humidityHigh=GREATEST(%s,%s),humidityLow=LEAST(%s,%s) WHERE ID=%s""",(temp,tempHigh,temp,tempLow,pressure,pressureHigh,pressure,pressureLow,humidity,humidityHigh,humidity,humidityLow,id)
+                                cur.execute(*query)
+                                db.commit()
                         else:
-                            query = """INSERT INTO dailyExtremes (sampledDate,decidegreesHigh,decidegreesLow,pressureHigh,pressureLow,humidityHigh,humidityLow) VALUES(%s,%s,%s,%s,%s,%s,%s)""",(GMT_date,temp,temp,pressure,pressure,humidity,humidity)
+                            query = """INSERT INTO dailyExtremes (sampledDate,decidegreesHigh,decidegreesLow,pressureHigh,pressureLow,humidityHigh,humidityLow) VALUES(%s,%s,%s,%s,%s,%s,%s)""",(local_date,temp,temp,pressure,pressure,humidity,humidity)
                             cur.execute(*query)
                             db.commit()
                             print("New")

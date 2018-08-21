@@ -21,7 +21,7 @@ die( "Connection failed: " . mysqli_connect_error());
 }
 // Get most recent data
 if ($dataRange === "Today") {
-$sql="SELECT GMT, decidegrees, pressure, humidity FROM sensor_data WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
+$sql="SELECT GMT, decidegrees, pressure, humidity FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
 }
 
 elseif ($dataRange === "Annual") {
@@ -30,8 +30,8 @@ $sql = "select * FROM dailyExtremes WHERE sampledDate > DATE_SUB(NOW(), INTERVAL
 $result=mysqli_query($conn, $sql) or die(mysqli_error($conn));
 
 
-$myArray=array();
-if ($result)
+
+if (mysqli_num_rows($result)!=0)
 {
 
     $myArray =mysqli_fetch_all($result,MYSQLI_ASSOC);

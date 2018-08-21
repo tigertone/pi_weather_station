@@ -7,8 +7,10 @@
     <style>
       body {
         font-family: Arial;
+	font-size: 0.6em;
         margin:0;
         padding:0;
+	line-height:1.5em;
       }
       .container {
         display: grid;
@@ -49,6 +51,10 @@
       .tab button.active {
         background-color: #ccc;
       }
+
+
+.statusIcon{width:0.4em;height:0.4em;border-radius:50%;border:1px solid #000; background-color:#94E185; border-color: #78D965; box-shadow: 0px 0px 4px 1px #94E185; display:inline-block; line-height:1em}
+
     </style>
     <div class="tab">
       <button class="tablinks" onclick="selectTab(event, 'Today')" id="defaultOpen">Today
@@ -76,12 +82,13 @@
       </div>
     </div>
      
-     <div>
+    
+	<div id="footer" style="visibility:hidden">
+	Status: <span id="statusIcon" class="statusIcon"></span>
      </div>
 
     <script src="/chartJs_2.7.2/Chart.bundle.min.js">
-    </script>
-    
+</script>
 <script>
       Chart.defaults.global.legend.display = false;
       Chart.defaults.global.tooltips.enabled = false;
@@ -186,13 +193,15 @@ config = createConfig(GMT,temp, -10, 30, 'Temp (°C)')
         config = createConfig(GMT,humidity, 0, 100, 'Humidity (%)')
         ctx = document.getElementById('canvasHumidity').getContext('2d');
         chartHumidity = new Chart(ctx, config)
+        var footerElement = document.getElementById("footer");
+        footerElement.style.visibility = "visible";
 }
 else {
 
 chartTemp.data.datasets[0].data = temp;
 chartTemp.data.datasets[1].data = [];
 chartTemp.data.labels = GMT;
- chartPressure.data.datasets[0].data=pressure 
+ chartPressure.data.datasets[0].data=pressure;
 chartPressure.data.datasets[1].data = []; 
 chartPressure.data.labels =GMT; 
 chartHumidity.data.datasets[0].data = humidity;
@@ -267,7 +276,47 @@ chartHumidity.update();
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
 
-</script> 
-  </body> 
-</html> 
 
+
+
+
+
+
+function getStatus() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function()
+  {
+    var statusIconElement = document.getElementById("statusIcon");
+    if (this.readyState == 4 && this.status == 200)
+    {
+        if (xhttp.responseText == 1)
+        {
+          statusIconElement.style.backgroundColor = "#94E185";
+          statusIconElement.style.boxShadow = "0px 0px 4px 1px #94E185";
+          statusIconElement.style.borderColor = "#78D965";
+        }
+        else
+        {
+          statusIconElement.style.backgroundColor = "#C9404D";
+          statusIconElement.style.boxShadow = "0px 0px 4px 1px #C9404D";
+          statusIconElement.style.borderColor = "#C42C3B";
+        }
+    }
+    else if (this.status == 0)
+    {
+      statusIconElement.style.backgroundColor = "#FFC182";
+      statusIconElement.style.boxShadow = "0px 0px 4px 1px #FFC182";
+      statusIconElement.style.borderColor = "#FFB161";
+    }
+  }
+
+
+  xhttp.open("GET","getStatus.php", true);
+  xhttp.send();
+}
+
+setInterval(getStatus, 10000);
+
+</script>
+</body>
+</html>
