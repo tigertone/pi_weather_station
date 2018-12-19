@@ -5,8 +5,6 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" type="text/css" href="weatherPortal.css">
 
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <div class="tab">

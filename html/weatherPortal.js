@@ -25,7 +25,7 @@
         // Get the element with id="defaultOpen" and click on it
         document.getElementById("defaultOpen").click();
 
-
+	getStatus();
         setInterval(getStatus, 10000);
 
 
@@ -256,7 +256,4 @@ function getStatus() {
         }
 
 
-function startDateString(days) {
-  var date = moment().format('MM/DD/YYYY HH:mm:SS');
-  return date;
-}
+
