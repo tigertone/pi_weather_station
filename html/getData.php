@@ -35,11 +35,14 @@ if (mysqli_num_rows($result)!=0)
 {
 
     $myArray =mysqli_fetch_all($result,MYSQLI_ASSOC);
-    echo json_encode($myArray);
+
+} else {
+
+    $myArray = "noData";
 
 }
 
-
+echo json_encode($myArray);
 
 mysqli_close($conn);
 

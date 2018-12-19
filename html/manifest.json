@@ -1,0 +1,11 @@
+{
+
+"short_name": "Weather",
+"name": "Pi Weather Station",
+"start_url": "/weatherPortal.php",
+"display": "standalone",
+"scope": "/",
+"background_color": "#FFFFFF",
+"theme_color": "#FFFFFF"
+
+}

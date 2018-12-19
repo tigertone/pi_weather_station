@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
-
+<html manifest="weatherPortal.appcache">
+	
 <head>
+    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" type="text/css" href="weatherPortal.css">
 
     <meta name="mobile-web-app-capable" content="yes">
@@ -13,8 +14,6 @@
         </button>
         <button class="tablinks" onclick="selectTab(event, 'Annual')">Annual
         </button>
-    </div>
-    <div class="spacer">
     </div>
 </head>
 
@@ -36,7 +35,7 @@
     </div>
 
 
-    <div id="footer" style="visibility:hidden">
+    <div id="footer">
         Status: <span id="statusIcon" class="statusIcon"></span>
     </div>
 
@@ -45,5 +44,4 @@
     <script src="/weatherPortal.js">
     </script>
 </body>
-
 </html>
