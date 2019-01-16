@@ -1,3 +1,4 @@
+
 // Set properties common to all charts
 
         Chart.defaults.global.legend.display = false;
@@ -6,6 +7,7 @@
         Chart.defaults.global.responsive = true;
         Chart.defaults.global.animation.duration = 0;
         Chart.defaults.global.title.display = false;
+	//Chart.defaults.global.scales.tickMarkLength = 0;
         //Chart.defaults.global.scales.xAxes.type = "time";
         //Chart.defaults.global.scales.xAxes.display: true;
         Chart.defaults.global.elements.line.fill = false;
@@ -48,91 +50,109 @@ function selectTab(evt, tabName) {
 
 		    if  (returnedData!='noData'){
 
+
                         if (tabName == 'Today') {
                         
 			
 			
 	                    GMT = returnedData.map(function(item) {
-        	                return item.GMT.toString()
+        	                return String(item.GMT)
                 	    });
-                       	    temp = returnedData.map(function(item) {
-                            return item.decidegrees.toString() / 10
+                       	    tempInternal = returnedData.map(function(item) {
+                            return String(item.decidegreesInternal) / 10
                             });
 
-                        	pressure = returnedData.map(function(item) {
-                            	return item.pressure.toString()
+                        	pressureInternal = returnedData.map(function(item) {
+                            	return String(item.pressureInternal)
                         	});
-                        	humidity = returnedData.map(function(item) {
-                            	return item.humidity.toString()
+                        	humidityInternal = returnedData.map(function(item) {
+                            	return String(item.humidityInternal)
                         	});
-
 			
+                       	    tempExternal = returnedData.map(function(item) {
+                            return String(item.decidegreesExternal) / 10
+                            });
+                        	humidityExternal = returnedData.map(function(item) {
+                            	return String(item.humidityExternal)
+                        	});
+				
+		
 
 	                        if (typeof chartTemp == 'undefined') {
-	                            	config = createConfig(GMT, temp, -10, 30, 'Temp (°C)')
+	                            	config = createConfig(GMT, tempInternal,tempExternal, -10, 30, 'Temp (°C)')
 	                            	ctx = document.getElementById('canvasTemp').getContext('2d');
 	                            	chartTemp = new Chart(ctx, config)
-	                            	config = createConfig(GMT, pressure, 925, 1050, 'Pressure (mbar)')
+	                            	config = createConfig(GMT, pressureInternal, [],925, 1050, 'Pressure (mbar)')
 	                            	ctx = document.getElementById('canvasPressure').getContext('2d');
 	                            	chartPressure = new Chart(ctx, config)
-	                            	config = createConfig(GMT, humidity, 0, 100, 'Humidity (%)')
+	                            	config = createConfig(GMT, humidityInternal, humidityExternal, 0, 100, 'Humidity (%)')
 	                            	ctx = document.getElementById('canvasHumidity').getContext('2d');
 	                            	chartHumidity = new Chart(ctx, config)
-	                            	var footerElement = document.getElementById("footer");
+	                            	//chartHumidity.options.scales.yAxes.ticks.padding = 100;
+					var footerElement = document.getElementById("footer");
 	                            	footerElement.style.visibility = "visible";
 	                        } else {
 	
-	                            chartTemp.data.datasets[0].data = temp;
-	                            chartTemp.data.datasets[1].data = [];
+	                            chartTemp.data.datasets[0].data = tempInternal;
+	                            chartTemp.data.datasets[1].data = tempExternal;
 	                            chartTemp.data.labels = GMT;
-	                            chartPressure.data.datasets[0].data = pressure;
+	                            chartPressure.data.datasets[0].data = pressureInternal;
 	                            chartPressure.data.datasets[1].data = [];
 	                            chartPressure.data.labels = GMT;
-	                            chartHumidity.data.datasets[0].data = humidity;
-	                            chartHumidity.data.datasets[1].data = [];
+	                            chartHumidity.data.datasets[0].data = humidityInternal;
+	                            chartHumidity.data.datasets[1].data = humidityExternal;
 	                            chartHumidity.data.labels = GMT;
-	
-	                            chartTemp.data.datasets[0].backgroundColor = 'rgba(50, 50, 50, 0.5)';
-	                            chartPressure.data.datasets[0].backgroundColor = 'rgba(255, 0, 0, 0.5)';
-	                            chartHumidity.data.datasets[0].backgroundColor = 'rgba(255, 0, 0, 0.5)';
-	
+		
                         	}
+
+
+			var currentDate = new Date();
+			var xAxesEnd = currentDate.toUTCString();
+			var xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
+			
+			chartTemp.options.scales.xAxes[0].time.min = xAxesStart;
+			chartTemp.options.scales.xAxes[0].time.max = xAxesEnd;
+			chartPressure.options.scales.xAxes[0].time.min = xAxesStart;
+			chartPressure.options.scales.xAxes[0].time.max = xAxesEnd;
+			chartHumidity.options.scales.xAxes[0].time.min = xAxesStart;
+			chartHumidity.options.scales.xAxes[0].time.max = xAxesEnd;	
+
 
                     } else if (tabName == 'Annual') {
 
                         GMT = returnedData.map(function(item) {
-                            return item.sampledDate.toString()
+                            return String(item.sampledDate)
                         });
                         maxTemp = returnedData.map(function(item) {
-                            return item.decidegreesHigh.toString() / 10
+                            return String(item.decidegreesInternalHigh) / 10
                         });
 
                         minTemp = returnedData.map(function(item) {
-                            return item.decidegreesLow.toString() / 10
+                            return String(item.decidegreesInternalLow) / 10
                         });
                         maxPressure = returnedData.map(function(item) {
-                            return item.pressureHigh.toString()
+                            return String(item.pressureInternalHigh)
                         });
 
                         minPressure = returnedData.map(function(item) {
-                            return item.pressureLow.toString()
+                            return String(item.pressureInternalLow)
                         });
                         maxHumidity = returnedData.map(function(item) {
-                            return item.humidityHigh.toString()
+                            return String(item.humidityInternalHigh)
                         });
 
                         minHumidity = returnedData.map(function(item) {
-                            return item.humidityLow.toString()
+                            return String(item.humidityInternalLow)
                         });
 
                         if (typeof chartTemp == 'undefined') {
-                            	config = createConfig(GMT, maxTemp, -10, 30, 'Temp (°C)')
+                            	config = createConfig(GMT, maxTemp, [], -10, 30, 'Temp (°C)')
                             	ctx = document.getElementById('canvasTemp').getContext('2d');
                             	chartTemp = new Chart(ctx, config)
-                            	config = createConfig(GMT, maxPressure, 925, 1050, 'Pressure (mbar)')
+                            	config = createConfig(GMT, maxPressure, [], 925, 1050, 'Pressure (mbar)')
                             	ctx = document.getElementById('canvasPressure').getContext('2d');
                             	chartPressure = new Chart(ctx, config)
-                            	config = createConfig(GMT, maxHumidity, 0, 100, 'Humidity (%)')
+                            	config = createConfig(GMT, maxHumidity, [], 0, 100, 'Humidity (%)')
                             	ctx = document.getElementById('canvasHumidity').getContext('2d');
                             	chartHumidity = new Chart(ctx, config)
                             	var footerElement = document.getElementById("footer");
@@ -190,17 +210,17 @@ function selectTab(evt, tabName) {
         }
 
 
-function createConfig(xData, yData, min, max, yLabel) {
+function createConfig(xData, yData1, yData2, min, max, yLabel) {
             config = {
                 type: 'line',
                 data: {
                     labels: xData,
                     datasets: [{
-                            data: yData
+                            data: yData1
                         },
 
                         {
-                            data: []
+                            data: yData2
 
                         },
                     ]
@@ -210,7 +230,7 @@ function createConfig(xData, yData, min, max, yLabel) {
 
                     scales: {
                         xAxes: [{
-                            type: "time"
+                           type: "time"
                         }],
                         yAxes: [{
                             ticks: {
