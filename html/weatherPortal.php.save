@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html manifest="weatherPortal.appcache">
-
-
-
-
+	
 <head>
-
-<link rel="manifest" href="/manifest.json">
-<link rel="stylesheet" type="text/css" href="weatherPortal.css"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" type="text/css" href="weatherPortal.css">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 
     <div class="tab">
         <button class="tablinks" onclick="selectTab(event, 'Today')" id="defaultOpen">Today
@@ -20,12 +15,10 @@
     </div>
 </head>
 
-<body>
-     <div class="chart-container">
-
+<body width=>
         <div class="lineChartCanvas">
             <canvas id="lineChart1">
-            <canvas>
+            </canvas>
         </div>
 
         <div class="lineChartCanvas">
@@ -38,7 +31,6 @@
             </canvas>
         </div>
 
-</div>
 
 
     <div id="footer">

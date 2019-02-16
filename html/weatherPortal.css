@@ -1,15 +1,35 @@
 body {
+     box-sizing: border-box;
      font-family: Arial;
      font-size: 0.6em;
      margin:0;
      padding:75px 0px 0px 0px;
+     display:block;
+     color:grey;
+     background-color:white;
 }
- .container {
-     display: grid;
-     position: relative;
-     grid-template-columns: repeat(auto-fill, minmax(200px 500px));
-     grid-template-rows: repeat(minmax(20vh, 50vh));
+ .chart-container {
+     -moz-user-select: none;
+     -webkit-user-select: none;
+     -ms-user-select: none;
+    margin:auto;
+    width:100%;
+    max-width:800px;
+     display:grid;
+     grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+     grid-gap:10px;
+     /*grid-template-rows: 300px 300px 300px;
+     */
 }
+
+.lineChartCanvas {
+/*width:100%;
+max-width:5000px;
+height:200px;
+display:block;
+*/
+}
+
 /* Style the tab */
  .tab {
      position: fixed;
@@ -40,7 +60,7 @@ body {
  .tab button.active {
      background-color: #ccc;
 }
- .statusIcon {
+/* #statusIcon {
      width:0.4em;
      height:0.4em;
      border-radius:50%;
@@ -49,10 +69,13 @@ body {
      border-color: #78D965;
      box-shadow: 0px 0px 4px 1px #94E185;
      display:inline-block;
-}
+     -webkit-text-size-adjust:100%;
+} */
 
 #footer{
     visibility: hidden;
     padding: 3em 3em 1.5em 1.5em;
+    display:block;
+    font-size:0.4em;
 }
 

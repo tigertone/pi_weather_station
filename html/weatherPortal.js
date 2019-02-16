@@ -11,24 +11,32 @@
         //Chart.defaults.global.scales.xAxes.type = "time";
         //Chart.defaults.global.scales.xAxes.display: true;
         Chart.defaults.global.elements.line.fill = false;
+        Chart.defaults.global.elements.line.borderJoinStyle = 'round';
         Chart.defaults.global.elements.line.tension = 0;
+        Chart.defaults.global.elements.line.borderWidth = 2;
+
         //      Chart.defaults.line.showLines = false;
-        Chart.defaults.global.elements.point.pointStyle = 'circle';
-        Chart.defaults.global.elements.point.radius = 1;
-        Chart.defaults.global.elements.point.borderWidth = 0;
-        Chart.defaults.global.elements.line.borderWidth = 1;
-        //    Chart.defaults.global.elements.point.borderColor = 'rgba(1,1,0,0)';
+        Chart.defaults.global.elements.point.radius = 0;
         Chart.defaults.global.defaultFontSize = 6;
         Chart.defaults.global.events = [];
         //    Chart.defaults.global.gridlines.display = false;
-        var chartTemp;
 
-        
         // Get the element with id="defaultOpen" and click on it
         document.getElementById("defaultOpen").click();
 
 	getStatus();
         setInterval(getStatus, 10000);
+
+                                config = createConfig([], [], [], -10, 30, 'Temp (°C)')
+                            	ctx = document.getElementById('lineChart1').getContext('2d');
+                            	chartTemp = new Chart(ctx, config)
+                            	config = createConfig([], [], [], 925, 1050, 'Pressure (mbar)')
+                            	ctx = document.getElementById('lineChart2').getContext('2d');
+                            	chartPressure = new Chart(ctx, config)
+                            	config = createConfig([], [], [], 0, 100, 'Humidity (%)')
+                            	ctx = document.getElementById('lineChart3').getContext('2d');
+                            	chartHumidity = new Chart(ctx, config)
+                            	document.getElementById("footer").style.visibility = "visible";
 
 
 function selectTab(evt, tabName) {
@@ -52,150 +60,61 @@ function selectTab(evt, tabName) {
 
 
                         if (tabName == 'Today') {
-                        
-			
-			
-	                    GMT = returnedData.map(function(item) {
-        	                return String(item.GMT)
-                	    });
-                       	    tempInternal = returnedData.map(function(item) {
-                            return String(item.decidegreesInternal) / 10
-                            });
 
-                        	pressureInternal = returnedData.map(function(item) {
-                            	return String(item.pressureInternal)
-                        	});
-                        	humidityInternal = returnedData.map(function(item) {
-                            	return String(item.humidityInternal)
-                        	});
-			
-                       	    tempExternal = returnedData.map(function(item) {
-                            return String(item.decidegreesExternal) / 10
-                            });
-                        	humidityExternal = returnedData.map(function(item) {
-                            	return String(item.humidityExternal)
-                        	});
-				
-		
-
-	                        if (typeof chartTemp == 'undefined') {
-	                            	config = createConfig(GMT, tempInternal,tempExternal, -10, 30, 'Temp (°C)')
-	                            	ctx = document.getElementById('canvasTemp').getContext('2d');
-	                            	chartTemp = new Chart(ctx, config)
-	                            	config = createConfig(GMT, pressureInternal, [],925, 1050, 'Pressure (mbar)')
-	                            	ctx = document.getElementById('canvasPressure').getContext('2d');
-	                            	chartPressure = new Chart(ctx, config)
-	                            	config = createConfig(GMT, humidityInternal, humidityExternal, 0, 100, 'Humidity (%)')
-	                            	ctx = document.getElementById('canvasHumidity').getContext('2d');
-	                            	chartHumidity = new Chart(ctx, config)
-	                            	//chartHumidity.options.scales.yAxes.ticks.padding = 100;
-					var footerElement = document.getElementById("footer");
-	                            	footerElement.style.visibility = "visible";
-	                        } else {
-	
-	                            chartTemp.data.datasets[0].data = tempInternal;
-	                            chartTemp.data.datasets[1].data = tempExternal;
-	                            chartTemp.data.labels = GMT;
-	                            chartPressure.data.datasets[0].data = pressureInternal;
+	                            chartTemp.data.datasets[0].data = returnedData.decidegreesInternal.map(function(x) { return x / 10; });
+	                            chartTemp.data.datasets[1].data = returnedData.decidegreesExternal.map(function(x) { return x / 10; });
+	                            chartTemp.data.labels = returnedData.GMT;
+	                            chartPressure.data.datasets[0].data = returnedData.pressureInternal;
 	                            chartPressure.data.datasets[1].data = [];
-	                            chartPressure.data.labels = GMT;
-	                            chartHumidity.data.datasets[0].data = humidityInternal;
-	                            chartHumidity.data.datasets[1].data = humidityExternal;
-	                            chartHumidity.data.labels = GMT;
-		
-                        	}
+	                            chartPressure.data.labels = returnedData.GMT;
+	                            chartHumidity.data.datasets[0].data = returnedData.humidityInternal;
+	                            chartHumidity.data.datasets[1].data = returnedData.humidityExternal;
+	                            chartHumidity.data.labels = returnedData.GMT;
+
+	                            chartTemp.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
+                        chartTemp.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
+                        chartPressure.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
+                        chartPressure.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
+                        chartHumidity.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
+                        chartHumidity.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
+
 
 
 			var currentDate = new Date();
 			var xAxesEnd = currentDate.toUTCString();
 			var xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
-			
+
+
+
+                    } else if (tabName == 'Annual') {
+
+			var currentDate = new Date();
+			var xAxesEnd = currentDate.toUTCString();
+			var xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
+
+			chartTemp.data.datasets[0].data = returnedData.decidegreesInternalHigh.map(function(x) { return x / 10; });
+                        chartTemp.data.datasets[1].data = returnedData.decidegreesInternalLow.map(function(x) { return x / 10; });
+                        chartTemp.data.labels = returnedData.sampledDate;
+                        chartPressure.data.datasets[0].data = returnedData.pressureInternalHigh;
+                        chartPressure.data.datasets[1].data = returnedData.pressureInternalLow;
+                        chartPressure.data.labels = returnedData.sampledDate;
+                        chartHumidity.data.datasets[0].data = returnedData.humidityInternalHigh;
+                        chartHumidity.data.datasets[1].data = returnedData.humidityInternalLow;
+                        chartHumidity.data.labels = returnedData.sampledDate;
+                        chartTemp.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
+                        chartTemp.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
+                        chartPressure.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
+                        chartPressure.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
+                        chartHumidity.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
+                        chartHumidity.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
+                    }
+
 			chartTemp.options.scales.xAxes[0].time.min = xAxesStart;
 			chartTemp.options.scales.xAxes[0].time.max = xAxesEnd;
 			chartPressure.options.scales.xAxes[0].time.min = xAxesStart;
 			chartPressure.options.scales.xAxes[0].time.max = xAxesEnd;
 			chartHumidity.options.scales.xAxes[0].time.min = xAxesStart;
 			chartHumidity.options.scales.xAxes[0].time.max = xAxesEnd;	
-
-
-                    } else if (tabName == 'Annual') {
-
-                        GMT = returnedData.map(function(item) {
-                            return String(item.sampledDate)
-                        });
-                        maxTemp = returnedData.map(function(item) {
-                            return String(item.decidegreesInternalHigh) / 10
-                        });
-
-                        minTemp = returnedData.map(function(item) {
-                            return String(item.decidegreesInternalLow) / 10
-                        });
-                        maxPressure = returnedData.map(function(item) {
-                            return String(item.pressureInternalHigh)
-                        });
-
-                        minPressure = returnedData.map(function(item) {
-                            return String(item.pressureInternalLow)
-                        });
-                        maxHumidity = returnedData.map(function(item) {
-                            return String(item.humidityInternalHigh)
-                        });
-
-                        minHumidity = returnedData.map(function(item) {
-                            return String(item.humidityInternalLow)
-                        });
-
-                        if (typeof chartTemp == 'undefined') {
-                            	config = createConfig(GMT, maxTemp, [], -10, 30, 'Temp (°C)')
-                            	ctx = document.getElementById('canvasTemp').getContext('2d');
-                            	chartTemp = new Chart(ctx, config)
-                            	config = createConfig(GMT, maxPressure, [], 925, 1050, 'Pressure (mbar)')
-                            	ctx = document.getElementById('canvasPressure').getContext('2d');
-                            	chartPressure = new Chart(ctx, config)
-                            	config = createConfig(GMT, maxHumidity, [], 0, 100, 'Humidity (%)')
-                            	ctx = document.getElementById('canvasHumidity').getContext('2d');
-                            	chartHumidity = new Chart(ctx, config)
-                            	var footerElement = document.getElementById("footer");
-                            	footerElement.style.visibility = "visible";
-
-
-                        } 
-
-
-			
-
-
-			var currentDate = new Date();
-			var xAxesEnd = currentDate.toUTCString();
-			var xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
-			
-
-			chartTemp.data.datasets[0].data = maxTemp;
-                        chartTemp.data.datasets[1].data = minTemp;
-                        chartTemp.data.labels = GMT;
-                        chartPressure.data.datasets[0].data = maxPressure
-                        chartPressure.data.datasets[1].data = minPressure
-                        chartPressure.data.labels = GMT;
-                        chartHumidity.data.datasets[0].data = maxHumidity;
-                        chartHumidity.data.datasets[1].data = minHumidity;
-                        chartHumidity.data.labels = GMT;
-                        chartTemp.data.datasets[0].backgroundColor = 'rgba(255, 0, 0, 0.5)';
-                        chartTemp.data.datasets[1].backgroundColor = 'rgba(0, 0, 255, 0.5)';
-                        chartPressure.data.datasets[0].backgroundColor = 'rgba(255, 0, 0, 0.5)';
-                        chartPressure.data.datasets[1].backgroundColor = 'rgba(0, 0, 255, 0.5)';
-                        chartHumidity.data.datasets[0].backgroundColor = 'rgba(255, 0, 0, 0.5)';
-                        chartHumidity.data.datasets[1].backgroundColor = 'rgba(0, 0, 255, 0.5)';
-			chartTemp.options.scales.xAxes[0].time.min = xAxesStart;
-			chartTemp.options.scales.xAxes[0].time.max = xAxesEnd;
-			chartPressure.options.scales.xAxes[0].time.min = xAxesStart;
-			chartPressure.options.scales.xAxes[0].time.max = xAxesEnd;
-			chartHumidity.options.scales.xAxes[0].time.min = xAxesStart;
-			chartHumidity.options.scales.xAxes[0].time.max = xAxesEnd;		
-			
-			
-			
-                    }
-		
                     chartPressure.update();
                     chartTemp.update();
                     chartHumidity.update();
@@ -249,31 +168,53 @@ function createConfig(xData, yData1, yData2, min, max, yLabel) {
         }
 
 
-function getStatus() {
+function getStatus()
+{
             var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                var statusIconElement = document.getElementById("statusIcon");
-                if (this.readyState == 4 && this.status == 200) {
-                    if (xhttp.responseText == 1) {
-                        statusIconElement.style.backgroundColor = "#94E185";
-                        statusIconElement.style.boxShadow = "0px 0px 4px 1px #94E185";
-                        statusIconElement.style.borderColor = "#78D965";
-                    } else {
-                        statusIconElement.style.backgroundColor = "#C9404D";
-                        statusIconElement.style.boxShadow = "0px 0px 4px 1px #C9404D";
-                        statusIconElement.style.borderColor = "#C42C3B";
+            xhttp.onreadystatechange = function()
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+                    samplingStatus = JSON.parse(xhttp.responseText);
+                    if (samplingStatus.internalSampling == 1)
+                    {
+			document.getElementById("statusInternal").textContent = "OK";
+//                        statusIconInternalElement.style.backgroundColor = "#94E185";
                     }
-                } else if (this.status == 0) {
-                    statusIconElement.style.backgroundColor = "#FFC182";
-                    statusIconElement.style.boxShadow = "0px 0px 4px 1px #FFC182";
-                    statusIconElement.style.borderColor = "#FFB161";
+                    else if (samplingStatus.internalSampling == 0)
+                    {
+			document.getElementById("statusInternal").textContent = "OK";
+//                        statusIconInternalElement.style.backgroundColor = "#C9404D";
+                    }
+
+                    if (samplingStatus.externalSampling == 1)
+                    {
+			document.getElementById("statusExternal").textContent = "OK";
+//                        statusIconExternalElement.style.backgroundColor = "#94E185";
+                    }
+                    else if (samplingStatus.externalSampling == 0)
+                    {
+			document.getElementById("statusExternal").textContent = "No recent data";
+//                        statusIconExternalElement.style.backgroundColor = "#C9404D";
+                    }
+		        document.getElementById("statusVoltageExternal").textContent = (samplingStatus.voltage1/10) + "v";
+                	document.getElementById("statusPercentExternal").textContent = samplingStatus.percentSuccessTemp + "%";
+
+		    }
+		    else if (this.status == 404)
+		    {
+		        document.getElementById("statusInternal").textContent="No connection";
+		        document.getElementById("statusExternal").textContent = "No connection";
+                    document.getElementById("statusVoltageExternal").textContent = "-";
+                	document.getElementById("statusPercentExternal").textContent = "-";
                 }
             }
 
 
-            xhttp.open("GET", "getStatus.php", true);
+            xhttp.open("GET", "getStatus.php?" + (new Date()).getTime(), true);
             xhttp.send();
-        }
+            }
+            
 
 
 

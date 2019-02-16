@@ -3,6 +3,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
+$startTime = microtime(true);
 $dataRange=$_GET["dataRange"];
 $resamplingInterval=$_GET["resamplingInterval"];
 $servername="localhost";
@@ -21,20 +22,26 @@ die( "Connection failed: " . mysqli_connect_error());
 }
 // Get most recent data
 if ($dataRange === "Today") {
-$sql="SELECT GMT, decidegreesInternal, pressureInternal, humidityInternal, decidegreesExternal, humidityExternal FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
+$queryFields = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal", "decidegreesExternal", "humidityExternal");
+//$sql="SELECT GMT, decidegreesInternal, pressureInternal, humidityInternal, decidegreesExternal, humidityExternal FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
+$sql="SELECT ".implode(',',$queryFields)." FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
 }
 
 elseif ($dataRange === "Annual") {
-$sql = "select * FROM dailyExtremes WHERE sampledDate > DATE_SUB(NOW(), INTERVAL 1 YEAR)";
+$queryFields = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternal1");
+$sql = "SELECT ".implode(',',$queryFields)."  FROM dailyExtremes WHERE sampledDate > DATE_SUB(NOW(), INTERVAL 1 YEAR)";
 }
 $result=mysqli_query($conn, $sql) or die(mysqli_error($conn));
-
-
 
 if (mysqli_num_rows($result)!=0)
 {
 
-    $myArray =mysqli_fetch_all($result,MYSQLI_ASSOC);
+    $tmpArray =mysqli_fetch_all($result,MYSQLI_ASSOC);
+    $myArray = array();
+    foreach ($queryFields as $fieldName)
+    {
+        $myArray[$fieldName] = array_column($tmpArray,$fieldName);
+    }
 
 } else {
 
@@ -42,8 +49,7 @@ if (mysqli_num_rows($result)!=0)
 
 }
 
-echo json_encode($myArray);
-
+echo json_encode($myArray, JSON_NUMERIC_CHECK);
 mysqli_close($conn);
 
 ?>
