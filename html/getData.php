@@ -38,6 +38,7 @@ if (mysqli_num_rows($result)!=0)
 
     $tmpArray =mysqli_fetch_all($result,MYSQLI_ASSOC);
     $myArray = array();
+    
     foreach ($queryFields as $fieldName)
     {
         $myArray[$fieldName] = array_column($tmpArray,$fieldName);

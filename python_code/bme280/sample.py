@@ -5,7 +5,7 @@ from bme280 import *
 import MySQLdb
 import time
 import math
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from RF24 import *
 import RPi.GPIO as GPIO
 from struct import *
@@ -46,6 +46,38 @@ while True:
         # Connect to MySQL
         db = MySQLdb.connect(host="localhost", user="database_writer",passwd="PASSWORD", db="weather_records")
         cur = db.cursor()
+        
+        # If there has been a gap since the last data point insert a row with null values so that chartjs won't join the gaps
+        try:
+            
+            query = """SELECT GMT FROM sensor_data order by id desc limit 1;"""
+            cur.execute(query)
+
+            if cur.rowcount>0:
+                results = cur.fetchone()
+                
+                if (datetime.now() - results[0]).seconds > 120:
+                    query = """INSERT INTO sensor_data (GMT) VALUES(%s)""",(local_datetime_str)
+                    cur.execute(*query)
+                    db.commit()
+            
+            
+            query = """SELECT sampledDate FROM dailyExtremes order by id desc limit 1;"""
+            cur.execute(query)
+
+            if cur.rowcount>0:
+                results = cur.fetchone()
+
+            if (date.today() - results[0]).days >= 2:
+                    query = """INSERT INTO dailyExtremes (sampledDate) VALUES(%s)""", (local_datetime.strftime("%Y-%m-%d "))
+                    print(query)
+                    cur.execute(*query)
+                    db.commit()
+                
+        except Exception as e:
+            print(e)
+            db.rollback()
+        
 
         try:
             if (newExternalData == True):
@@ -80,13 +112,13 @@ while True:
                     decidegreesExternalLow = results[9]
                     humidityExternalHigh = results[10]
                     humidityExternalLow = results[11]
-                    voltageLow = results[12]
+                    voltageHigh = results[12]
 
                     if decidegreesExternalHigh is None:
                         query = """UPDATE dailyExtremes SET decidegreesExternalHigh=%s,decidegreesExternalLow=%s,humidityExternalHigh=%s,humidityExternalLow=%s, voltageExternal1=%s WHERE ID=%s""",(decidegreesExternal,decidegreesExternal,humidityExternal,humidityExternal,voltage,id)
                         cur.execute(*query)
                         db.commit()
-                    if (decidegreesInternal>decidegreesInternalHigh or decidegreesInternal<decidegreesInternalLow or humidityInternal>humidityInternalHigh or humidityInternal<humidityInternalLow or pressureInternal>pressureInternalHigh or pressureInternal<pressureInternalLow or decidegreesExternal>decidegreesExternalHigh or decidegreesExternal<decidegreesExternalLow or humidityExternal>humidityExternalHigh or humidityExternal<humidityExternalLow or voltage<voltageLow):
+                    if (decidegreesInternal>decidegreesInternalHigh or decidegreesInternal<decidegreesInternalLow or humidityInternal>humidityInternalHigh or humidityInternal<humidityInternalLow or pressureInternal>pressureInternalHigh or pressureInternal<pressureInternalLow or decidegreesExternal>decidegreesExternalHigh or decidegreesExternal<decidegreesExternalLow or humidityExternal>humidityExternalHigh or humidityExternal<humidityExternalLow or voltage>voltageHigh):
                         query = """UPDATE dailyExtremes SET decidegreesInternalHigh=GREATEST(%s,%s),decidegreesInternalLow=LEAST(%s,%s),pressureInternalHigh=GREATEST(%s,%s),pressureInternalLow=LEAST(%s,%s),humidityInternalHigh=GREATEST(%s,%s),humidityInternalLow=LEAST(%s,%s),decidegreesExternalHigh=GREATEST(%s,%s),decidegreesExternalLow=LEAST(%s,%s),humidityExternalHigh=GREATEST(%s,%s),humidityExternalLow=LEAST(%s,%s) WHERE ID=%s""",(decidegreesInternal,decidegreesInternalHigh,decidegreesInternal,decidegreesInternalLow,pressureInternal,pressureInternalHigh,pressureInternal,pressureInternalLow,humidityInternal,humidityInternalHigh,humidityInternal,humidityInternalLow,decidegreesExternal,decidegreesExternalHigh,decidegreesExternal,decidegreesExternalLow,humidityExternal,humidityExternalHigh,humidityExternal,humidityExternalLow,id)
                         cur.execute(*query)
                         db.commit()

@@ -13,6 +13,7 @@
         Chart.defaults.global.elements.line.fill = false;
         Chart.defaults.global.elements.line.borderJoinStyle = 'round';
         Chart.defaults.global.elements.line.tension = 0;
+        Chart.defaults.global.elements.line.spanGaps = false;
         Chart.defaults.global.elements.line.borderWidth = 2;
 
         //      Chart.defaults.line.showLines = false;
@@ -27,16 +28,8 @@
 	getStatus();
         setInterval(getStatus, 10000);
 
-                                config = createConfig([], [], [], -10, 30, 'Temp (°C)')
-                            	ctx = document.getElementById('lineChart1').getContext('2d');
-                            	chartTemp = new Chart(ctx, config)
-                            	config = createConfig([], [], [], 925, 1050, 'Pressure (mbar)')
-                            	ctx = document.getElementById('lineChart2').getContext('2d');
-                            	chartPressure = new Chart(ctx, config)
-                            	config = createConfig([], [], [], 0, 100, 'Humidity (%)')
-                            	ctx = document.getElementById('lineChart3').getContext('2d');
-                            	chartHumidity = new Chart(ctx, config)
-                            	document.getElementById("footer").style.visibility = "visible";
+                            	
+
 
 
 function selectTab(evt, tabName) {
@@ -58,66 +51,88 @@ function selectTab(evt, tabName) {
 
 		    if  (returnedData!='noData'){
 
+		    	
 
                         if (tabName == 'Today') {
 
-	                            chartTemp.data.datasets[0].data = returnedData.decidegreesInternal.map(function(x) { return x / 10; });
-	                            chartTemp.data.datasets[1].data = returnedData.decidegreesExternal.map(function(x) { return x / 10; });
-	                            chartTemp.data.labels = returnedData.GMT;
-	                            chartPressure.data.datasets[0].data = returnedData.pressureInternal;
-	                            chartPressure.data.datasets[1].data = [];
-	                            chartPressure.data.labels = returnedData.GMT;
-	                            chartHumidity.data.datasets[0].data = returnedData.humidityInternal;
-	                            chartHumidity.data.datasets[1].data = returnedData.humidityExternal;
-	                            chartHumidity.data.labels = returnedData.GMT;
-
-	                            chartTemp.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
-                        chartTemp.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
-                        chartPressure.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
-                        chartPressure.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
-                        chartHumidity.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
-                        chartHumidity.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
-
-
-
-			var currentDate = new Date();
+                        	var currentDate = new Date();
 			var xAxesEnd = currentDate.toUTCString();
 			var xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
 
+                            xData = returnedData.GMT;
 
+                            toPlot1 = ['decidegreesExternal', 'pressureNull',     'humidityExternal'];
+   	                        toPlot2 = ['decidegreesInternal', 'pressureInternal', 'humidityInternal'];
+   	                        legendStr = ['Temp (°C)',         'Pressure (mbar)',  'Humidity (%)'];
+ 
+ data1Colour = 'rgba(15,170,10,0.5)';
+data2Colour = 'rgba(150, 150, 150, 0.5)';
 
-                    } else if (tabName == 'Annual') {
+                document.getElementById("legendLabel1").textContent = "  External";
+                document.getElementById("legendLabel2").textContent = "  Internal";
+                                document.getElementById("legendLine1").style.borderColor = data1Colour;
+                                document.getElementById("legendLine2").style.borderColor = data2Colour;
+
+                            } else if (tabName == 'Annual') {
 
 			var currentDate = new Date();
 			var xAxesEnd = currentDate.toUTCString();
 			var xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
 
-			chartTemp.data.datasets[0].data = returnedData.decidegreesInternalHigh.map(function(x) { return x / 10; });
-                        chartTemp.data.datasets[1].data = returnedData.decidegreesInternalLow.map(function(x) { return x / 10; });
-                        chartTemp.data.labels = returnedData.sampledDate;
-                        chartPressure.data.datasets[0].data = returnedData.pressureInternalHigh;
-                        chartPressure.data.datasets[1].data = returnedData.pressureInternalLow;
-                        chartPressure.data.labels = returnedData.sampledDate;
-                        chartHumidity.data.datasets[0].data = returnedData.humidityInternalHigh;
-                        chartHumidity.data.datasets[1].data = returnedData.humidityInternalLow;
-                        chartHumidity.data.labels = returnedData.sampledDate;
-                        chartTemp.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
-                        chartTemp.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
-                        chartPressure.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
-                        chartPressure.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
-                        chartHumidity.data.datasets[0].borderColor = 'rgba(255,40,40,0.5)';
-                        chartHumidity.data.datasets[1].borderColor = 'rgba(30, 144, 255, 0.5)';
-                    }
+	                                     xData = returnedData.sampledDate;
 
-			chartTemp.options.scales.xAxes[0].time.min = xAxesStart;
-			chartTemp.options.scales.xAxes[0].time.max = xAxesEnd;
-			chartPressure.options.scales.xAxes[0].time.min = xAxesStart;
-			chartPressure.options.scales.xAxes[0].time.max = xAxesEnd;
-			chartHumidity.options.scales.xAxes[0].time.min = xAxesStart;
-			chartHumidity.options.scales.xAxes[0].time.max = xAxesEnd;	
-                    chartPressure.update();
-                    chartTemp.update();
-                    chartHumidity.update();
+	                                     toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternal1'];
+   	                                     toPlot2 = ['decidegreesExternalLow',  'decidegreesInternalLow',  'humidityExternalLow',  'humidityInternalLow',  'pressureInternalLow',  ''];
+   	                                     legendStr = ['External temp (°C)',    'Internal temp (°C)',      'External humidity (%)','Internal humidity (%)','Internal pressure (mbar)', 'External voltage (V)'];
+        
+data1Colour = 'rgba(255,40,40,0.5)';
+data2Colour = 'rgba(30, 144, 255, 0.5)';
+
+                document.getElementById("legendLabel1").textContent = "  High";
+                document.getElementById("legendLabel2").textContent = "  Low";
+                document.getElementById("legendLine1").style.borderColor = data1Colour;
+                                document.getElementById("legendLine2").style.borderColor = data2Colour;
+
+
+        }
+                        
+mydiv = document.getElementById('chartContainerID');
+		    	
+		    	if (mydiv) {
+		    	while (mydiv.firstChild) {
+		    	    mydiv.removeChild(mydiv.firstChild);	
+		    	}
+		    	}
+
+				            for (i=0; i<toPlot1.length; i++) {
+                                  
+
+                                 var div = document.createElement('div');
+				div.classList.add('lineChartContainer');
+				var canvas = document.createElement('canvas');
+				div.appendChild(canvas);
+				document.querySelector('.chartContainer').appendChild(div);
+				
+
+
+                if (toPlot1[i].startsWith('pressure')) {
+				        new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd,  925, 1050, legendStr[i], data1Colour, data2Colour));
+                } else if (toPlot1[i].startsWith('decidegrees')) {
+                        new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), returnedData[toPlot2[i]].map(function(x) { if (x!=null) {return x / 10} return null }), xAxesStart, xAxesEnd,  -10, 30, legendStr[i], data1Colour, data2Colour));               
+                } else if (toPlot1[i].startsWith('humidity')) {
+                	    new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, 0, 100, legendStr[i], data1Colour, data2Colour));
+                } else if (toPlot1[i].startsWith('voltage')) {
+                	new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, 0, 4, legendStr[i], data1Colour, data2Colour));
+                }             
+                document.getElementById("footer").style.visibility = "visible";
+                document.getElementById("legend").style.visibility = "visible";
+
+
+
+				            }
+
+	                           
+	                                              
 		    }
 
             }
@@ -129,17 +144,19 @@ function selectTab(evt, tabName) {
         }
 
 
-function createConfig(xData, yData1, yData2, min, max, yLabel) {
+function createConfig(xData, yData1, yData2, xmin, xmax, ymin, ymax, yLabel, data1Colour, data2Colour) {
             config = {
                 type: 'line',
                 data: {
                     labels: xData,
                     datasets: [{
-                            data: yData1
+                            data: yData1,
+                             borderColor: data1Colour,    
                         },
 
                         {
-                            data: yData2
+                            data: yData2,
+                            borderColor: data2Colour,
 
                         },
                     ]
@@ -153,8 +170,8 @@ function createConfig(xData, yData1, yData2, min, max, yLabel) {
                         }],
                         yAxes: [{
                             ticks: {
-                                suggestedMax: max,
-                                suggestedMin: min
+                                suggestedMax: ymax,
+                                suggestedMin: ymin
                             },
                             scaleLabel: {
                                 display: true,
