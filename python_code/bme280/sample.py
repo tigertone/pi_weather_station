@@ -1,7 +1,7 @@
 # chmod +x read_serial_data.py
 
 from __future__ import print_function
-from bme280 import *
+from Adafruit_BME280 import *
 import MySQLdb
 import time
 import math

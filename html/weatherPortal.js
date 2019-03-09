@@ -145,6 +145,7 @@ mydiv = document.getElementById('chartContainerID');
 
 
 function createConfig(xData, yData1, yData2, xmin, xmax, ymin, ymax, yLabel, data1Colour, data2Colour) {
+
             config = {
                 type: 'line',
                 data: {
@@ -166,7 +167,11 @@ function createConfig(xData, yData1, yData2, xmin, xmax, ymin, ymax, yLabel, dat
 
                     scales: {
                         xAxes: [{
-                           type: "time"
+                           type: "time",
+                           time: {
+                                max: xmax,
+                                min: xmin
+                            },
                         }],
                         yAxes: [{
                             ticks: {

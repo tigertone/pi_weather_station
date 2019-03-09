@@ -1,8 +1,10 @@
 CACHE MANIFEST
-# 23-02-2019:v5
+# 08-03-2019:v3
 
 # Explicitly cached 'master entries'.
 CACHE:
+favicon_16x16.png
+favicon_32x32.png
 weatherPortal.php
 getData.php
 getStatus.php

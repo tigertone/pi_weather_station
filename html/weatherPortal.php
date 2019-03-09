@@ -8,6 +8,11 @@
 
 <link rel="manifest" href="/manifest.json">
 <link rel="stylesheet" type="text/css" href="weatherPortal.css"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="apple-touch-icon" sizes="180x180" href="icon_180x180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon_152x152.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon_16x16.png" >  
+<link rel="icon" type="image/png" sizes="32x32" href="favicon_32x32.png" >  
+
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
