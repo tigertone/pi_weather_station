@@ -42,6 +42,7 @@ count = 0
 newExternalData = False
 while True:
     count = count + 1
+    print("NewLoop")
     if sensor:
         decidegreesInternal = int(sensor.read_temperature()*10)
         pressureInternal = int(sensor.read_pressure()/100)
@@ -161,6 +162,7 @@ while True:
     while time.time() < (starttime + (60*count)):
         try:
             if radio.available():
+                print("newData")
                 while radio.available():
                     len = radio.getDynamicPayloadSize()
                     receive_payload = radio.read(len)
@@ -179,8 +181,6 @@ while True:
             exec_type, exec_obj, exec_tb = sys.exec_info()
             print(exec_type, exec_tb.tb_lineno)
 
- 
-    print("new loop")
 #    decidegreesExternal = int(5)
 #    humidityExternal = int(33)
 #    newExternalData = True
