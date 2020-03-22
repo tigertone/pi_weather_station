@@ -54,3 +54,15 @@ sudo nano display_current_data.php <br>
 npm install chart.js --save<br>
 cp ./node_modules/chart.js/dist/Chart.bundle.js ./pi_weather_station/php/chartJs_2.7.2		% Copy to php folder<br>
 cp ./node_modules/chart.js/dist/Chart.bundle.min.js ./pi_weather_station/php/chartJs_2.7.2<br>
+
+
+
+# Start service to run sampling script on boot
+
+sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
+sudo systemctl start weatherStation.service
+
+# Git
+Git add .
+Git commit -m "Commit description "
+Git add -u      # for deleted files 
