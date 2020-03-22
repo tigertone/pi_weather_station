@@ -16,7 +16,7 @@
         Chart.defaults.global.elements.line.spanGaps = false;
         Chart.defaults.global.elements.line.borderWidth = 2;
 
-        //      Chart.defaults.line.showLines = false;
+        Chart.defaults.line.showLines = true;
         Chart.defaults.global.elements.point.radius = 0;
         Chart.defaults.global.defaultFontSize = 6;
         Chart.defaults.global.events = [];
@@ -80,6 +80,8 @@ data2Colour = 'rgba(150, 150, 150, 0.5)';
 			var xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
 
 	                                     xData = returnedData.sampledDate;
+	                                     console.log(xData);
+	                                     
 
 	                                     toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternal1'];
    	                                     toPlot2 = ['decidegreesExternalLow',  'decidegreesInternalLow',  'humidityExternalLow',  'humidityInternalLow',  'pressureInternalLow',  ''];
@@ -138,7 +140,7 @@ mydiv = document.getElementById('chartContainerID');
             }
 	}
 
-            xmlhttp.open("GET", "getData.php?dataRange=" + tabName + "&resamplingInterval=" + Math.ceil((60 * 24) / (window.innerWidth * .9)), true);
+            xmlhttp.open("GET", "getData.php?dataRange=" + tabName, true);
             xmlhttp.send();
 
         }
@@ -152,7 +154,7 @@ function createConfig(xData, yData1, yData2, xmin, xmax, ymin, ymax, yLabel, dat
                     labels: xData,
                     datasets: [{
                             data: yData1,
-                             borderColor: data1Colour,    
+                             borderColor: data1Colour,
                         },
 
                         {

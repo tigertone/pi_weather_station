@@ -26,14 +26,16 @@ radio = RF24(RPI_V2_GPIO_P1_15, BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ)
 pipes = [0xF0F0F0F0E1, 0xF0F0F0F0D2]
 
 radio.begin()
+radio.enableDynamicPayloads();
 radio.setPALevel(RF24_PA_MAX);
 radio.setDataRate(RF24_250KBPS)
 radio.printDetails()
-radio.enableDynamicPayloads();
 radio.setCRCLength(RF24_CRC_8);
+radio.setChannel(80);
+radio.setAutoAck(True);
 
 
-radio.openWritingPipe(pipes[1])
+#radio.openWritingPipe(pipes[1])
 radio.openReadingPipe(1,pipes[0])
 radio.startListening()
 

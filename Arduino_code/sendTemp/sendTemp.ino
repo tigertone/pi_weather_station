@@ -71,7 +71,8 @@ void setup(void)
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
   radio.setRetries(3,5);
-  radio.setChannel(38);
+  radio.setAutoAck(true);
+  radio.setChannel(80);
 
 
 

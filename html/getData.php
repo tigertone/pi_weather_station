@@ -5,7 +5,6 @@ header("Content-Type: application/json; charset=UTF-8");
 
 $startTime = microtime(true);
 $dataRange=$_GET["dataRange"];
-$resamplingInterval=$_GET["resamplingInterval"];
 $servername="localhost";
 $username="database_reader";
 $password="PASSWORD";
@@ -23,8 +22,7 @@ die( "Connection failed: " . mysqli_connect_error());
 // Get most recent data
 if ($dataRange === "Today") {
 $queryFields = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal", "decidegreesExternal", "humidityExternal");
-//$sql="SELECT GMT, decidegreesInternal, pressureInternal, humidityInternal, decidegreesExternal, humidityExternal FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
-$sql="SELECT ".implode(',',$queryFields)." FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY) AND ID mod ".$resamplingInterval." = 0";
+$sql="SELECT ".implode(',',$queryFields)." FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY)";
 }
 
 elseif ($dataRange === "Annual") {

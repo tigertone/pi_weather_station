@@ -1,0 +1,13 @@
+[Unit]
+Description=Start logging weather data automatically after power up
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u sample.py
+WorkingDirectory=/home/pi/pi_weather_station/python_code/bme280
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
