@@ -1,3 +1,30 @@
+Setup
+Goal is to have a 1MB directory in RAM for temporarily storage.
+First create the tmp dir:
+ sudo mkdir /var/tmp 
+then edit the fstab file by
+ sudo nano /etc/fstab
+and add the line
+ tmpfs /var/tmp tmpfs nodev,nosuid,size=1M 0 0 
+save and close the file. Now issue
+ sudo mount -a
+To check if your operation succeeded issue
+ df
+which should report (among the other disks) a tmpfs with 1024 1K blocks (=1MB) as /var/tmp
+ pi@raspberrypi ~ $ df
+ Filesystem     1K-blocks    Used Available Use% Mounted on
+ rootfs           3807952 1814024   1820896  50% /
+ /dev/root        3807952 1814024   1820896  50% /
+ devtmpfs          183596       0    183596   0% /dev
+ tmpfs              38372     268     38104   1% /run
+ tmpfs               5120       0      5120   0% /run/lock
+ tmpfs              76740       0     76740   0% /run/shm
+ /dev/mmcblk0p1     57288   18544     38744  33% /boot
+ tmpfs               1024       4      1020   1% /var/tmp
+This should give you a small space for your garbage. Instead of writing your tmp files to /tmp, now write them to /var/tmp. And remember that, as is generally the case with RAM drives, data on the drive is lost after a reboot.
+
+
+
 # arduino serial connection
 turn off serial in sudo raspi-config to prevent serial data being sent to arduino during startup <br>
 
