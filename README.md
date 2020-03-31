@@ -10,7 +10,7 @@ then edit the fstab file by
 
 and add the line
 
- tmpfs /var/weatherTmp tmpfs nodev,nosuid,size=1M 0 0 
+ tmpfs /home/pi/pi_weather_station/weatherTmp tmpfs nodev,nosuid,size=16K 0 0 
 
 save and close the file. Now issue
 
