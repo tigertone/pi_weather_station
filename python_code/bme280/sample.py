@@ -42,6 +42,7 @@ radio.startListening()
 starttime=time.time()
 count = 0
 newExternalData = False
+
 while True:
     count = count + 1
     print("NewLoop")
@@ -140,7 +141,7 @@ while True:
             else:
                 if (newExternalData == True):
                     query = """INSERT INTO dailyExtremes (sampledDate,decidegreesInternalHigh,decidegreesInternalLow,pressureInternalHigh,pressureInternalLow,humidityInternalHigh,humidityInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh,humidityExternalLow,voltageExternal1) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(local_date,decidegreesInternal,decidegreesInternal,pressureInternal,pressureInternal,humidityInternal,humidityInternal, decidegreesExternal, decidegreesExternal, humidityExternal, humidityExternal, voltage)
-                if (newExternalData == False):
+                elif (newExternalData == False):
                     query = """INSERT INTO dailyExtremes (sampledDate,decidegreesInternalHigh,decidegreesInternalLow,pressureInternalHigh,pressureInternalLow,humidityInternalHigh,humidityInternalLow) VALUES(%s,%s,%s,%s,%s,%s,%s)""",(local_date,decidegreesInternal,decidegreesInternal,pressureInternal,pressureInternal,humidityInternal,humidityInternal)
                 cur.execute(*query)
                 db.commit()
@@ -149,8 +150,6 @@ while True:
             print(e)
             db.rollback()
             print(sys.exc_info())
-            
-           
 
     except Exception as e:
         print(e)
@@ -172,9 +171,18 @@ while True:
                     decidegreesExternal = unpack('h',receive_payload[1:3])
                     decidegreesExternal = int(decidegreesExternal[0])
                     humidityExternal = receive_payload[3]
-                    print(voltage)
-                    print(decidegreesExternal)
-                    print(humidityExternal)
+                    if 'voltageCurrent' in locals():
+                        if voltageCurrent != voltage:
+                            with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
+                                fileToWrite.write(str(voltageCurrent)+"\n")
+                    else:
+                        voltageCurrent = voltage
+                        with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
+                            fileToWrite.write(str(voltageCurrent)+"\n")
+                    
+                    if (decidegreesExternal == 1000) and (humidityExternal == 255):
+                        decidegreesExternal = None
+                        humidityExternal = None
                 newExternalData = True
             time.sleep(1)
 
@@ -182,7 +190,3 @@ while True:
             print(e)
             exec_type, exec_obj, exec_tb = sys.exec_info()
             print(exec_type, exec_tb.tb_lineno)
-
-#    decidegreesExternal = int(5)
-#    humidityExternal = int(33)
-#    newExternalData = True

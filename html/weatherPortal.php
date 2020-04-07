@@ -34,9 +34,10 @@
     <span id="legendLine1" class="legendLines"></span><span id="legendLabel1" class="legendText"></span><span id="legendLine2" class="legendLines"></span><span id="legendLabel2" class="legendText"></span><br/>
 </div>
     <div id="footer">
+		
         Internal status: <span id="statusInternal" class="statusText"></span><br/>
         External status: <span id="statusExternal" class="statusText"></span><br/>
-        Battery: <span id="statusVoltageExternal" class="statusText"></span><br/>
+	Battery: <span id="statusVoltageExternal" class="statusText"></span><br/>
         External success rate: <span id="statusPercentExternal" class="statusText"></span><br/>
     </div>
 
