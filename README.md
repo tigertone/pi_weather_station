@@ -1,3 +1,24 @@
+Setup
+Goal is to have a 1MB directory in RAM for temporarily storage.
+First create the tmp dir:
+
+ sudo mkdir /var/weatherTmp
+
+then edit the fstab file by
+
+ sudo nano /etc/fstab
+
+and add the line
+
+ tmpfs /home/pi/pi_weather_station/weatherTmp tmpfs nodev,nosuid,size=16K 0 0 
+
+save and close the file. Now issue
+
+ sudo mount -a
+
+To check if your operation succeeded issue
+ df
+
 # arduino serial connection
 turn off serial in sudo raspi-config to prevent serial data being sent to arduino during startup <br>
 
@@ -54,3 +75,15 @@ sudo nano display_current_data.php <br>
 npm install chart.js --save<br>
 cp ./node_modules/chart.js/dist/Chart.bundle.js ./pi_weather_station/php/chartJs_2.7.2		% Copy to php folder<br>
 cp ./node_modules/chart.js/dist/Chart.bundle.min.js ./pi_weather_station/php/chartJs_2.7.2<br>
+
+
+
+# Start service to run sampling script on boot
+
+sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
+sudo systemctl start weatherStation.service
+
+# Git
+Git add .
+Git commit -m "Commit description "
+Git add -u      # for deleted files 
