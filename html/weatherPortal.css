@@ -11,14 +11,24 @@
 body {
      box-sizing: border-box;
      font-family: Arial;
-     font-size: 8px;
      margin:0;
      padding:75px 0px 0px 0px;
      display:block;
      color:grey;
      background-color:white;
 }
- .chartContainer {
+
+
+#currentData {
+
+     line-height:1.5em;
+     text-align: center;
+     font-size: 14px;
+     width:100%;
+
+}
+
+.chartContainer {
      -moz-user-select: none;
      -webkit-user-select: none;
      -ms-user-select: none;
@@ -63,43 +73,12 @@ body {
      background-color: #ccc;
 }
 
-#legend{
-    visibility: hidden;
-    margin: 3em auto 10em auto;
-    display:block;
-    font-size:0.4em;
-    width: 100%;
-    max-width:800px;
-}
-
-
-.legendLines{
-    width: 2em;
-    height: 0px;
-    line-height 0px;
-    font-size: 6px;
-    border-bottom: 1px solid green;
-    padding: 0px 0px 0px 0px;
-    margin: 0px 0px 0.4em 6em;
-    display:inline-block;
-}
-
-
-.legendText{
-    padding: 0px 0px 0px 0px;
-    margin: 0px 0px 0px 0px;
-    display:inline;
-    font-size: 6px;
-    height: 1em
-    vertical-align: middle;
-}
-
-#footer{
-    visibility: hidden;
+#status{
     padding: 1em 2em 1em 2em;
-    display:block;
-    font-size:8px;
-    border-top: 1px solid #ccc;
+    display:none;
+    font-size:12px;
+    text-align: left;
+    line-height: normal;
 }
 
 

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 01-04-2020:v4
+# 13-04-2020:v16
 
 # Explicitly cached 'master entries'.
 CACHE:
@@ -16,4 +16,3 @@ chartJs_2.7.2/Chart.bundle.min.js
 # Resources that require the user to be online
 NETWORK:
 *
-

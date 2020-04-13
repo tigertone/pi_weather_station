@@ -48,12 +48,11 @@ struct dataStruct {
 
 void setup(void)
 {
-  pinMode(A0, OUTPUT);
 
   ADMUX = (0 << REFS1) | (1 << REFS0) | (0 << ADLAR) | (1 << MUX3) | (1 << MUX2) | (1 << MUX1) | (0 << MUX0);
-
-  tempValid = sht31.begin(0x44);
+  
   radio.begin();
+  tempValid = sht31.begin(0x44);
 
   // enable dynamic payloads
   radio.enableDynamicPayloads();
@@ -81,8 +80,9 @@ void loop(void)
 
   if (tempValid)
   {
-    payload.temp = int(sht31.readTemperature() * 10);
-    payload.humidity = byte(sht31.readHumidity());
+    // Add 0.5 as casting always round down
+    payload.temp = int((sht31.readTemperature() * 10) + 0.5);
+    payload.humidity = byte(sht31.readHumidity() + 0.5);
   }
   else
   {
@@ -101,7 +101,6 @@ void loop(void)
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
-  LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);  
 
 
 }

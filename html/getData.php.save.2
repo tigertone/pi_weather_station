@@ -25,7 +25,7 @@ if ($dataRange === "Current")
 {
 	$queryFieldsAll = array_merge($queryFieldsInternal,$queryFieldsExternal, $queryFieldsExtremes);
 	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensor_data order by ID desc limit 1");
-	$sqlQueries[] = "SELECT ".implode(',',$queryFieldsExternal)." FROM sensor_data WHERE GMT > (DATE_SUB(NOW(), INTERVAL 10 MINUTE) AND decidegreesExternal IS NOT NULL) order by ID desc limit 1";
+	$sqlQueries[] = "SELECT ".implode(',',$queryFieldsExternal)." FROM sensor_data WHERE order by ID desc limit 1";
 	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExtremes)."  FROM dailyExtremes WHERE sampledDate = CURDATE()";
 }
 
