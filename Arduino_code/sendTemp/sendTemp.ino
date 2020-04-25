@@ -20,10 +20,6 @@
 #include "Adafruit_SHT31.h"
 #include "LowPower.h"
 
-
-
-
-const long InternalReferenceVoltage = 1056L;  // Adjust this value to your boards specific internal BG voltage x1000
 bool tempValid;
 
 
@@ -41,15 +37,12 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
 
 struct dataStruct {
-  byte voltage;
   int temp;
   byte humidity;
 } payload;
 
 void setup(void)
 {
-
-  ADMUX = (0 << REFS1) | (1 << REFS0) | (0 << ADLAR) | (1 << MUX3) | (1 << MUX2) | (1 << MUX1) | (0 << MUX0);
   
   radio.begin();
   tempValid = sht31.begin(0x44);
@@ -69,18 +62,10 @@ void setup(void)
 
 void loop(void)
 {
-  // Start a conversion
-  ADCSRA |= _BV( ADSC );
   
-  // Wait for it to complete
-  while ( ( (ADCSRA & (1 << ADSC)) != 0 ) );
-
-  payload.voltage = (((InternalReferenceVoltage * 1023L) / ADC) + 5L) / 100L; // calculates for straight line value   //Determins what actual Vcc is, (X 100), based on known bandgap voltage;
-
-
   if (tempValid)
   {
-    // Add 0.5 as casting always round down
+    // Add 0.5 as casting always rounds down
     payload.temp = int((sht31.readTemperature() * 10) + 0.5);
     payload.humidity = byte(sht31.readHumidity() + 0.5);
   }
@@ -101,7 +86,6 @@ void loop(void)
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
-
 
 }
 

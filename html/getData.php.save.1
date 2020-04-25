@@ -3,54 +3,72 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-$startTime = microtime(true);
+//$startTime = microtime(true);
 $dataRange=$_GET["dataRange"];
-$servername="localhost";
-$username="database_reader";
-$password="PASSWORD";
-$dbname="weather_records";
 
 // Create connection
-$conn=mysqli_connect($servername, $username, $password, $dbname);
-
-
+$conn=mysqli_connect("localhost", "database_reader", "PASSWORD", "weather_records");
 
 // Check connection
 if (!$conn) {
 die( "Connection failed: " . mysqli_connect_error());
 }
+
+$queryFieldsInternal = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal");
+$queryFieldsExternal = array("decidegreesExternal", "humidityExternal");
+$queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternal1");
+
 // Get most recent data
-if ($dataRange === "Now") {
-$queryFields = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal", "decidegreesExternal", "humidityExternal");
-$sql="SELECT ".implode(',',$queryFields)." FROM sensor_data order by ID desc limit 1";
-}
-
-elseif ($dataRange === "Today") {
-$queryFields = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal", "decidegreesExternal", "humidityExternal");
-$sql="SELECT ".implode(',',$queryFields)." FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY)";
-}
-
-elseif ($dataRange === "Annual") {
-$queryFields = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternal1");
-$sql = "SELECT ".implode(',',$queryFields)."  FROM dailyExtremes WHERE sampledDate > DATE_SUB(NOW(), INTERVAL 1 YEAR)";
-}
-$result=mysqli_query($conn, $sql) or die(mysqli_error($conn));
-
-if (mysqli_num_rows($result)!=0)
+if ($dataRange === "Current")
 {
+	$queryFieldsAll = array_merge($queryFieldsInternal,$queryFieldsExternal, $queryFieldsExtremes, array("pressureInternalTrend"));
+	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensor_data order by ID desc limit 1");
+	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExternal)." FROM sensor_data WHERE (GMT > DATE_SUB(NOW(), INTERVAL 10 MINUTE) AND decidegreesExternal IS NOT NULL) order by ID desc limit 1";
+	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExtremes)."  FROM dailyExtremes WHERE sampledDate = CURDATE()";
+	$sqlQueries[] ="SELECT IF(10>AVG(pressureInternal)+5,1,IF(10<AVG(pressureInternal)-5,-1,0)) as pressureInternalTrend FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 HOUR)";
+}
 
-    $tmpArray =mysqli_fetch_all($result,MYSQLI_ASSOC);
-    $myArray = array();
+elseif ($dataRange === "Today")
+{
+	$queryFieldsAll = array_merge($queryFieldsInternal,$queryFieldsExternal);
+	$sqlQueries=array("SELECT ".implode(',',$queryFieldsAll)." FROM sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 DAY)");
+}
 
-    foreach ($queryFields as $fieldName)
-    {
-        $myArray[$fieldName] = array_column($tmpArray,$fieldName);
-    }
+elseif ($dataRange === "Annual")
+{
+	$queryFieldsAll = $queryFieldsExtremes;
+	$sqlQueries = array("SELECT ".implode(',',$queryFieldsAll)."  FROM dailyExtremes WHERE sampledDate > DATE_SUB(NOW(), INTERVAL 1 YEAR)");
+}
 
-} else {
+foreach ($sqlQueries as $query)
+{
+	$result=mysqli_query($conn, $query);
 
-    $myArray = "noData";
 
+	if (mysqli_num_rows($result)!=0)
+	{
+
+		$tmpArray =mysqli_fetch_all($result,MYSQLI_ASSOC);
+
+		if (!isset($myArray))
+		{
+			$myArray= array();
+		}
+
+		foreach ($queryFieldsAll as $fieldName)
+		{
+			
+			if (!empty(array_column($tmpArray,$fieldName)))
+			{
+				$myArray[$fieldName] = array_column($tmpArray,$fieldName);
+			}
+		}
+
+	} else {
+
+		$myArray = "noData";
+
+	}
 }
 
 echo json_encode($myArray, JSON_NUMERIC_CHECK);

@@ -50,7 +50,7 @@ while True:
         decidegreesInternal = int(sensor.read_temperature()*10)
         pressureInternal = int(sensor.read_pressure()/100)
         humidityInternal = int(sensor.read_humidity())
-        local_datetime = datetime.now()
+        local_datetime = datetime.utcnow()
         local_date = local_datetime.strftime("%Y-%m-%d ")
         local_datetime_str = local_date + local_datetime.strftime("%H:%M:%S")
 
@@ -167,23 +167,25 @@ while True:
                 while radio.available():
                     len = radio.getDynamicPayloadSize()
                     receive_payload = radio.read(len)
-                    voltage = receive_payload[0]
-                    decidegreesExternal = unpack('h',receive_payload[1:3])
+                    #voltage = receive_payload[0]
+                    voltage = None
+                    decidegreesExternal = unpack('h',receive_payload[0:2])
                     decidegreesExternal = int(decidegreesExternal[0])
-                    humidityExternal = receive_payload[3]
-                    if 'voltageCurrent' in locals():
-                        if voltageCurrent != voltage:
-                            with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
-                                fileToWrite.write(str(voltageCurrent)+"\n")
-                    else:
-                        voltageCurrent = voltage
-                        with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
-                            fileToWrite.write(str(voltageCurrent)+"\n")
+                    humidityExternal = receive_payload[2]
+                    #if 'voltageCurrent' in locals():
+                        #if voltageCurrent != voltage:
+                            #with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
+                                #fileToWrite.write(str(voltageCurrent)+"\n")
+                    #else:
+                        #voltageCurrent = voltage
+                        #with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
+                            #fileToWrite.write(str(voltageCurrent)+"\n")
                     
-                    if (decidegreesExternal == 1000) and (humidityExternal == 255):
+                    if (decidegreesExternal == 100) and (humidityExternal == 255):
                         decidegreesExternal = None
                         humidityExternal = None
-                newExternalData = True
+                    else:
+                        newExternalData = True
             time.sleep(1)
 
         except Exception as e:

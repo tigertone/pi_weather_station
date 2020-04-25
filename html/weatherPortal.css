@@ -12,21 +12,13 @@ body {
      box-sizing: border-box;
      font-family: Arial;
      margin:0;
-     padding:75px 0px 0px 0px;
+     padding: 3.5em 0px 0px 0px;
      display:block;
      color:grey;
      background-color:white;
 }
 
 
-#currentData {
-
-     line-height:1.5em;
-     text-align: center;
-     font-size: 14px;
-     width:100%;
-
-}
 
 .chartContainer {
      -moz-user-select: none;
@@ -34,11 +26,17 @@ body {
      -ms-user-select: none;
     margin:auto;
     width:100%;
-    max-width:800px;
+    max-width:1200px;
      display:grid;
-     grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+     grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
      grid-gap:10px;
      margin-bottom: 10px;
+}
+
+.gridDiv {
+    padding: 0px;
+    box-sizing: border-box;
+    position: relative;
 }
 
 

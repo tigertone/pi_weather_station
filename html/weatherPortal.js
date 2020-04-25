@@ -1,26 +1,26 @@
 
 // Set properties common to all charts
 
-Chart.defaults.global.legend.display = false;
-Chart.defaults.global.tooltips.enabled = false;
-Chart.defaults.global.maintainAspectRatio = false;
-Chart.defaults.global.responsive = true;
-Chart.defaults.global.animation.duration = 0;
-Chart.defaults.global.title.display = false;
-//Chart.defaults.global.scales.tickMarkLength = 0;
-//Chart.defaults.global.scales.xAxes.type = "time";
-//Chart.defaults.global.scales.xAxes.display: true;
-Chart.defaults.global.elements.line.fill = false;
-Chart.defaults.global.elements.line.borderJoinStyle = 'round';
-Chart.defaults.global.elements.line.tension = 0;
-Chart.defaults.global.elements.line.spanGaps = false;
-Chart.defaults.global.elements.line.borderWidth = 2;
+Chart.defaults.legend.display = false
+Chart.defaults.tooltips.enabled = false;
+Chart.defaults.scale.ticks.maxRotation = 0;
+Chart.defaults.scale.ticks.minRotation = 0;
+Chart.defaults.scale.ticks.sampleSize = 5;
+//Chart.defaults.maintainAspectRatio = false;
+//Chart.defaults.responsive = true;
+Chart.defaults.animation = false;
+Chart.defaults.title.display = false;
+Chart.defaults.elements.line.fill = false;
+Chart.defaults.elements.line.borderJoinStyle = 'round';
+Chart.defaults.elements.line.borderCapStyle = 'round';
+Chart.defaults.elements.line.tension = 0;
+Chart.defaults.elements.line.pointBorderWidth = 2;
 
 Chart.defaults.line.showLines = true;
-Chart.defaults.global.elements.point.radius = 0;
-Chart.defaults.global.defaultFontSize = 6;
-Chart.defaults.global.events = [];
-//    Chart.defaults.global.gridlines.display = false;
+Chart.defaults.line.spanGaps = false;
+Chart.defaults.elements.point.radius = 0;
+Chart.defaults.fontSize = 8;
+Chart.defaults.events = [];
 
 // Get the element with id="defaultOpen" and click on it
 document.getElementById("defaultOpen").click();
@@ -28,6 +28,10 @@ document.getElementById("defaultOpen").click();
 
 function selectTab(evt, tabName)
 {
+	if (typeof statusUpdateTimer !== "undefined")
+	{
+		clearInterval(statusUpdateTimer);
+	}
 
 	var i, tablinks;
 	tablinks = document.getElementsByClassName("tablinks");
@@ -44,9 +48,9 @@ function selectTab(evt, tabName)
 	
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
 		{
-		
+
 			returnedData = JSON.parse(xmlhttp.responseText);
-		
+
 			if  (returnedData!='noData')
 			{
 				if (tabName == 'Current')
@@ -54,49 +58,58 @@ function selectTab(evt, tabName)
 					toPlot1 = [];
 					
 					document.getElementById("chartContainerID").style.display = "none";
-					document.getElementById("currentData").style.display = "block";
+					document.getElementById("currentData").style.display = "table";
 					document.getElementById("status").style.display = "none";
+					document.getElementById("currentExtTempNow").textContent = (returnedData.decidegreesExternal/10).toFixed(1) +"°C";
+					document.getElementById("currentExtTempHigh").textContent = (returnedData.decidegreesExternalHigh/10).toFixed(1);
+					document.getElementById("currentExtTempLow").textContent = (returnedData.decidegreesExternalLow/10).toFixed(1);
+					document.getElementById("currentExtHumNow").textContent = returnedData.humidityExternal + "%";
+					document.getElementById("currentExtHumLow").textContent = returnedData.humidityExternalLow;
+					document.getElementById("currentExtHumHigh").textContent = returnedData.humidityExternalHigh;
+					document.getElementById("currentIntTempNow").textContent = (returnedData.decidegreesInternal/10).toFixed(1) +"°C";
+					document.getElementById("currentIntTempHigh").textContent = (returnedData.decidegreesInternalHigh/10).toFixed(1);
+					document.getElementById("currentIntTempLow").textContent = (returnedData.decidegreesInternalLow/10).toFixed(1);
+					document.getElementById("currentIntHumNow").textContent = returnedData.humidityInternal + "%";
+					document.getElementById("currentIntHumLow").textContent = returnedData.humidityInternalLow;
+					document.getElementById("currentIntHumHigh").textContent = returnedData.humidityInternalHigh;
+					document.getElementById("currentIntPressNow").textContent = returnedData.pressureInternal + "mBar";
+					document.getElementById("currentIntPressTrend").textContent = returnedData.pressureInternalTrend;
 					
 					
-					document.getElementById("sampledTime").textContent = returnedData.GMT;
-					document.getElementById("externalTempCurrent").textContent = (returnedData.decidegreesExternal/10).toFixed(1) + "°C";
-					document.getElementById("externalHumidityCurrent").textContent = returnedData.humidityExternal + "%";
-					document.getElementById("internalTempCurrent").textContent = (returnedData.decidegreesInternal/10).toFixed(1) + "°C";
-					document.getElementById("internalHumidityCurrent").textContent = returnedData.humidityInternal + "%";
-					document.getElementById("pressureCurrent").textContent = returnedData.pressureInternal + "mBar";
+					
 				}
 				else if (tabName == 'Today')
 				{
 					
-					var currentDate = new Date();
-					var xAxesEnd = currentDate.toUTCString();
-					var xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
+					currentDate = new Date();
+					xAxesEnd = currentDate.toUTCString();
+					xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
 			
-					xData = returnedData.GMT;
+					xData = returnedData.GMT.map(item=>{return new Date(item)});
 			
 					toPlot1 = ['decidegreesExternal', 'pressureNull',     'humidityExternal'];
 					toPlot2 = ['decidegreesInternal', 'pressureInternal', 'humidityInternal'];
 					legendStr = ['Temp (°C)',         'Pressure (mbar)',  'Humidity (%)'];
 					
-					data1Colour = 'rgba(15,170,10,0.5)';
-					data2Colour = 'rgba(150, 150, 150, 0.5)';
+					data1Colour = 'rgba(15,170,10,1)';
+					data2Colour = 'rgba(150, 150, 150, 1)';
 									
 				} 
 				else if (tabName == 'Annual')
 				{
 				
-					var currentDate = new Date();
-					var xAxesEnd = currentDate.toUTCString();
-					var xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
+					currentDate = new Date();
+					xAxesEnd = currentDate.toUTCString();
+					xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
 					
-					xData = returnedData.sampledDate;
+					xData = returnedData.sampledDate.map(item=>{return new Date(item)});
 										
 					toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternal1'];
 					toPlot2 = ['decidegreesExternalLow',  'decidegreesInternalLow',  'humidityExternalLow',  'humidityInternalLow',  'pressureInternalLow',  ''];
 					legendStr = ['External temp (°C)',    'Internal temp (°C)',      'External humidity (%)','Internal humidity (%)','Internal pressure (mbar)', 'External voltage (V)'];
 					
-					data1Colour = 'rgba(255,40,40,0.5)';
-					data2Colour = 'rgba(30, 144, 255, 0.5)';
+					data1Colour = 'rgba(255,40,40,1)';
+					data2Colour = 'rgba(30, 144, 255, 1)';
 					
 				}
 				
@@ -109,51 +122,63 @@ function selectTab(evt, tabName)
 					document.getElementById("status").style.display = "block";
 					
 					getStatus();
-					setInterval(getStatus, 10000);
+					statusUpdateTimer = setInterval(getStatus, 10000);
 					
 				}
-		
+				
+				
 				mydiv = document.getElementById('chartContainerID');
-			
-				if (mydiv) 
+								
+				while (mydiv.firstChild) 
 				{
-					while (mydiv.firstChild) 
-					{
-						mydiv.removeChild(mydiv.firstChild);	
-					}
+					mydiv.removeChild(mydiv.firstChild);	
 				}
+
 				
 				for (i=0; i<toPlot1.length; i++)
 				{
+
 					if (i == 0)
 					{
 						document.getElementById("currentData").style.display = "none";
 						document.getElementById("status").style.display = "none";
 						document.getElementById("chartContainerID").style.display = "grid";
 					}
+
 					var div = document.createElement('div');
-					div.classList.add('lineChartContainer');
+					div.className = "gridDiv";
+					mydiv.appendChild(div);
 					var canvas = document.createElement('canvas');
 					div.appendChild(canvas);
-					document.querySelector('.chartContainer').appendChild(div);
+				}
+
+					
+					
+					
+					//document.querySelector('.chartContainer').appendChild(div);
 		
-		
-		
+		for (i=0; i<toPlot1.length; i++)
+				{		
 					if (toPlot1[i].startsWith('pressure'))
 					{
-						new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd,  925, 1050, legendStr[i], data1Colour, data2Colour));
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd,  925, 1050, legendStr[i], data1Colour, data2Colour));
 					}
 					else if (toPlot1[i].startsWith('decidegrees'))
 					{
-						new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), returnedData[toPlot2[i]].map(function(x) { if (x!=null) {return x / 10} return null }), xAxesStart, xAxesEnd,  -10, 30, legendStr[i], data1Colour, data2Colour));               
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), returnedData[toPlot2[i]].map(function(x) { if (x!=null) {return x / 10} return null }), xAxesStart, xAxesEnd,  -10, 30, legendStr[i], data1Colour, data2Colour));               
 					} 
 					else if (toPlot1[i].startsWith('humidity'))
 					{
-						new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, 0, 100, legendStr[i], data1Colour, data2Colour));
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, 0, 100, legendStr[i], data1Colour, data2Colour));
 					}
 					else if (toPlot1[i].startsWith('voltage'))
 					{
-						new Chart(canvas.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, 0, 4, legendStr[i], data1Colour, data2Colour));
+						//dataParsed = new Array(xData.length);
+						//for (j=0; j<xData.length; j++){
+							//dataParsed[j] = {x:xData[j],y:returnedData[toPlot1[i]][j]}
+						//}
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, 0, 4, legendStr[i], data1Colour, data2Colour));
+
 					}             	
 				}
 			}
@@ -164,6 +189,8 @@ function selectTab(evt, tabName)
 	xmlhttp.send();
 
 }
+
+
 
 
 function createConfig(xData, yData1, yData2, xmin, xmax, ymin, ymax, yLabel, data1Colour, data2Colour)
@@ -195,29 +222,25 @@ function createConfig(xData, yData1, yData2, xmin, xmax, ymin, ymax, yLabel, dat
 	
 			scales:
 			{
-				xAxes: 
-				[{
+				x:
+				{
 					type: "time",
-					time:
-					{
-						max: xmax,
-						min: xmin
-					},
-				}],
-				
-				yAxes: 
-				[{
-					ticks:
-					{
-						suggestedMax: ymax,
-						suggestedMin: ymin
-					},
+					max: xmax,
+					min: xmin
+				},
+
+				y:
+				{
+
+					suggestedMax: ymax,
+					suggestedMin: ymin,
+
 					scaleLabel:
 					{
 						display: true,
 						labelString: yLabel
 					}
-				}]
+				}
 			},
 		}
 	}
@@ -255,6 +278,8 @@ function getStatus()
 			//                        statusIconExternalElement.style.backgroundColor = "#C9404D";
 			}
 			document.getElementById("statusVoltageExternal").textContent = (samplingStatus.voltage1/10) + "v";
+			// Temp code as electronics aren't functional
+			document.getElementById("statusVoltageExternal").textContent = "xxx";
 			document.getElementById("statusPercentExternal").textContent = samplingStatus.percentSuccessTemp + "%";
 
 		}
@@ -271,7 +296,3 @@ function getStatus()
 	xhttp.open("GET", "getStatus.php?" + (new Date()).getTime(), true);
 	xhttp.send();
 }
-
-
-
-
