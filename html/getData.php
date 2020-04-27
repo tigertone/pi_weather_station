@@ -25,7 +25,7 @@ $queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegree
 if ($dataRange === "Current")
 {
 	$queryFieldsAll = array_merge($queryFieldsInternal,$queryFieldsExternal, $queryFieldsExtremes, array("pressureInternalTrend"));
-	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensor_data order by ID desc limit 1");
+	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensor_data WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesInternal IS NOT NULL) order by ID desc limit 1");
 	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExternal)." FROM sensor_data WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesExternal IS NOT NULL) order by ID desc limit 1";
 	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExtremes)."  FROM dailyExtremes WHERE sampledDate = UTC_DATE()";
 	$sqlQueries[] ="SELECT IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)>AVG(pressureInternal)+3,'Rising',IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)<AVG(pressureInternal)-3,'Falling','Settled')) as pressureInternalTrend FROM sensor_data WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)";
@@ -51,7 +51,6 @@ $queryFieldsAll = str_replace("DATE_FORMAT(GMT,'%Y-%m-%dT%TZ') AS GMT","GMT",$qu
 
 foreach ($sqlQueries as $query)
 {
-	
 	$result=mysqli_query($conn, $query);
 
 
