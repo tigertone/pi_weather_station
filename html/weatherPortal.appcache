@@ -11,7 +11,8 @@ getStatus.php
 weatherPortal.css
 weatherPortal.js
 manifest.json
-chartJs_2.7.2/Chart.bundle.min.js
+chartJs_3.0.0/Chart.min.js
+chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js
 
 # Resources that require the user to be online
 NETWORK:
