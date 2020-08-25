@@ -1,3 +1,22 @@
+#Setup for pi zero W
+
+Enable ssh
+    If running headless, add empty file named "ssh" to boot directory (no file extension)
+    
+Add wifi
+    If running headless, create file named "wpa_supplicant.conf" in the boot directory. It must contain the following...
+    
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=GB
+
+network={
+ ssid="<Name of your wireless LAN>"
+ psk="<Password for your wireless LAN>"
+}
+
+
+
 Setup
 Goal is to have a 1MB directory in RAM for temporarily storage.
 First create the tmp dir:
