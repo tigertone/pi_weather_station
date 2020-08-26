@@ -1,9 +1,9 @@
-#Setup for pi zero W
+# Setup for pi zero W
 
-Enable ssh
+# Enable ssh
     If running headless, add empty file named "ssh" to boot directory (no file extension)
     
-Add wifi
+# Add wifi details
     If running headless, create file named "wpa_supplicant.conf" in the boot directory. It must contain the following...
     
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
@@ -14,6 +14,15 @@ network={
  ssid="<Name of your wireless LAN>"
  psk="<Password for your wireless LAN>"
 }
+
+# Modify /boot/config.txt
+
+Disable sound: dtparam=audio=off
+Disable bluetooth: dtoverlay=disable-bt
+Disable on board LED: dtparam=act_led_trigger=none
+                      dtparam=act_led_active=on
+
+ToDo: Disable HDMI
 
 
 
