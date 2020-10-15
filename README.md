@@ -57,42 +57,17 @@ tvservice -s    (after reboot)
 
 
  
-Setup
-Goal is to have a 1MB directory in RAM for temporarily storage.
-First create the tmp dir:
 
- sudo mkdir /var/weatherTmp
 
-then edit the fstab file by
 
- sudo nano /etc/fstab
-
-and add the line
-
- tmpfs /home/pi/pi_weather_station/weatherTmp tmpfs nodev,nosuid,size=16K 0 0 
-
-save and close the file. Now issue
-
- sudo mount -a
-
-To check if your operation succeeded issue
- df
-
-# arduino serial connection
-turn off serial in sudo raspi-config to prevent serial data being sent to arduino during startup <br>
-
-# Pi webserver
-sudo apt-get install mysql-server <br>
+# Setup webserver
+sudo apt-get install mariadb-server <br>
 sudo apt-get install python3-mysqldb <br>
-
-sudo apt-get install apache2 libapache2-mod-php7.0 php-mysqli <br>
-
-
-# Clone git repo
+sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli <br>
 
 then change working directory for apache2 (/var/www/html to html folder of repo) in 2 locations... <br>
 sudo nano /etc/apache2/sites-available/000-default.conf <br>
-udo nano /etc/apache2/apache2.conf <br>
+sudo nano /etc/apache2/apache2.conf <br>
  
 
 # Open MySQL
@@ -137,10 +112,39 @@ cp ./node_modules/chart.js/dist/Chart.bundle.min.js ./pi_weather_station/php/cha
 
 
 
+
 # Start service to run sampling script on boot
 
 sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
 sudo systemctl start weatherStation.service
+
+
+
+
+
+
+# If reverting to holding some variables in RAM (e.g. current voltage) rather than writing to DB
+Goal is to have a 16KB directory in RAM for temporarily storage.
+First create the tmp dir:
+
+ sudo mkdir /var/weatherTmp
+
+then edit the fstab file by
+
+ sudo nano /etc/fstab
+
+and add the line
+
+ tmpfs /home/pi/pi_weather_station/weatherTmp tmpfs nodev,nosuid,size=16K 0 0 
+
+save and close the file. Now issue
+
+ sudo mount -a
+
+To check if your operation succeeded issue
+ df
+
+
 
 # Git
 Git add .
