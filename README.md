@@ -21,11 +21,42 @@ Disable sound: dtparam=audio=off
 Disable bluetooth: dtoverlay=disable-bt
 Disable on board LED: dtparam=act_led_trigger=none
                       dtparam=act_led_active=on
+Set gpu memory to 16mb as running headless: gpu_mem=16
 
-ToDo: Disable HDMI
+# Create systemd file to disable HDMI port on boot
+sudo nano /etc/systemd/system/disableHDMI.service
+
+Add...
+
+
+*******************************************************
+
+[Unit]
+Description=Disable Raspberry Pi HDMI port
+
+[Service]
+Type=oneshot
+ExecStart=/opt/vc/bin/tvservice -o
+ExecStop=/opt/vc/bin/tvservice -p
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
+
+*******************************************************
+
+Enable...
+
+sudo systemctl enable /etc/systemd/system/disableHDMI.service
+
+Can be tested with...
+
+tvservice -s    (after reboot)
 
 
 
+
+ 
 Setup
 Goal is to have a 1MB directory in RAM for temporarily storage.
 First create the tmp dir:
