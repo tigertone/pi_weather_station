@@ -28,7 +28,7 @@ if ($dataRange === "Current")
 	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensor_data WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesInternal IS NOT NULL) order by ID desc limit 1");
 	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExternal)." FROM sensor_data WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesExternal IS NOT NULL) order by ID desc limit 1";
 	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExtremes)."  FROM dailyExtremes WHERE sampledDate = UTC_DATE()";
-	$sqlQueries[] ="SELECT IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)>AVG(pressureInternal)+3,'Rising',IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)<AVG(pressureInternal)-3,'Falling','Settled')) as pressureInternalTrend FROM sensor_data WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)";
+	$sqlQueries[] ="SELECT IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)>AVG(pressureInternal)+1,'Rising',IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)<AVG(pressureInternal)-1,'Falling','Settled')) as pressureInternalTrend FROM sensor_data WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 6 HOUR)";
 }
 
 elseif ($dataRange === "Today")

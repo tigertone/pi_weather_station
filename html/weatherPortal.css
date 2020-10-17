@@ -28,9 +28,10 @@ body {
     width:100%;
     max-width:1200px;
      display:grid;
-     grid-template-columns: repeat(auto-fill, minmax(500px,1fr));
+     grid-template-columns: repeat(auto-fill, minmax(375px,1fr));
      grid-gap:10px;
      margin-bottom: 10px;
+     font-size:small;
 }
 
 .gridDiv {
@@ -60,8 +61,9 @@ body {
      cursor: pointer;
      padding: 14px 16px;
      transition: 0.3s;
-     font-size: 17px;
+     font-size: medium;
 }
+
 /* Change background color of buttons on hover */
  .tab button:hover {
      background-color: #ddd;
@@ -71,12 +73,14 @@ body {
      background-color: #ccc;
 }
 
-#status{
-    padding: 1em 2em 1em 2em;
-    display:none;
-    font-size:12px;
-    text-align: left;
-    line-height: normal;
+.summaryTable {
+    margin:0 auto;
+    padding:0;
+    line-height: 1.25em;
 }
 
+#statusTable {
 
+    margin-top:2em;
+
+}

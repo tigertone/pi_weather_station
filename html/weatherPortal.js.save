@@ -4,6 +4,7 @@ Chart.defaults.plugins.legend.display = false;
 Chart.defaults.plugins.tooltip.enabled = false;
 Chart.defaults.scale.ticks.maxRotation = 0;
 Chart.defaults.scale.ticks.minRotation = 0;
+Chart.defaults.scale.ticks.sampleSize = 5;
 //Chart.defaults.maintainAspectRatio = false;
 //Chart.defaults.responsive = true;
 Chart.defaults.animation = false;
@@ -79,9 +80,8 @@ function selectTab(evt, tabName)
 					currentDate = new Date();
 					xAxesEnd = currentDate.toUTCString();
 					xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
-					
-					timeUnit = 'hour';
-					
+					timeUnit = 'month';
+					timeDisplayFormat = 'MMM';
 					xData = returnedData.GMT.map(item=>{return new Date(item)});
 			
 					toPlot1 = ['decidegreesExternal', 'pressureNull',     'humidityExternal'];
@@ -100,6 +100,7 @@ function selectTab(evt, tabName)
 					xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
 					
 					timeUnit = 'month';
+					timeDisplayFormat = 'MMM';
 
 					xData = returnedData.sampledDate.map(item=>{return new Date(item)});
 										
@@ -160,15 +161,15 @@ function selectTab(evt, tabName)
 				{		
 					if (toPlot1[i].startsWith('pressure'))
 					{
-						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, timeUnit, 925, 1050, legendStr[i], data1Colour, data2Colour));
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd,  925, 1050, legendStr[i], data1Colour, data2Colour));
 					}
 					else if (toPlot1[i].startsWith('decidegrees'))
 					{
-						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), returnedData[toPlot2[i]].map(function(x) { if (x!=null) {return x / 10} return null }), xAxesStart, xAxesEnd, timeUnit, -10, 30, legendStr[i], data1Colour, data2Colour));               
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), returnedData[toPlot2[i]].map(function(x) { if (x!=null) {return x / 10} return null }), xAxesStart, xAxesEnd,  -10, 30, legendStr[i], data1Colour, data2Colour));               
 					} 
 					else if (toPlot1[i].startsWith('humidity'))
 					{
-						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, timeUnit, 0, 100, legendStr[i], data1Colour, data2Colour));
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, 0, 100, legendStr[i], data1Colour, data2Colour));
 					}
 					else if (toPlot1[i].startsWith('voltage'))
 					{
@@ -176,7 +177,7 @@ function selectTab(evt, tabName)
 						//for (j=0; j<xData.length; j++){
 							//dataParsed[j] = {x:xData[j],y:returnedData[toPlot1[i]][j]}
 						//}
-						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, timeUnit, 0, 4, legendStr[i], data1Colour, data2Colour));
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, 0, 4, legendStr[i], data1Colour, data2Colour));
 
 					}             	
 				}
@@ -191,7 +192,7 @@ function selectTab(evt, tabName)
 
 
 
-function createConfig(xData, yData1, yData2, xmin, xmax, timeUnit, ymin, ymax, yLabel, data1Colour, data2Colour)
+function createConfig(xData, yData1, yData2, xmin, xmax, timeUnit, timeDisplayFormat, ymin, ymax, yLabel, data1Colour, data2Colour)
 {
 
 	config = 
@@ -221,19 +222,13 @@ function createConfig(xData, yData1, yData2, xmin, xmax, timeUnit, ymin, ymax, y
 			scales:
 			{
 				x:
-				{				
-				type: 'time',
-                time: 
-					{
-						unit: timeUnit,
-						displayFormats:
-						{
-							month: 'MMM',
-						},
+				{
+					type: "time",
 					max: xmax,
-					min: xmin,
-					},
+					time: {unit: timeUnit, displayFormats = timeDisplayFormat}
+					min: xmin
 				},
+
 				y:
 				{
 
@@ -286,8 +281,6 @@ function getStatus()
 			// Temp code as electronics aren't functional
 			document.getElementById("statusVoltageExternal").textContent = "xxx";
 			document.getElementById("statusPercentExternal").textContent = samplingStatus.percentSuccessTemp + "%";
-			document.getElementById("statusSpaceMb").textContent = samplingStatus.spaceRemainingMb + "MB";
-			document.getElementById("statusSpacePercent").textContent = samplingStatus.spaceRemainingPercent + "%";
 
 		}
 		else if (this.status == 404)

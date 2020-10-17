@@ -20,7 +20,7 @@ function toInteger(dirtyNumber) {
 
 function requiredArgs(required, args) {
   if (args.length < required) {
-    throw new TypeError(required + ' argument' + required > 1 ? 's' : '' + ' required, but only ' + args.length + ' present');
+    throw new TypeError(required + ' argument' + (required > 1 ? 's' : '') + ' required, but only ' + args.length + ' present');
   }
 }
 
@@ -89,7 +89,7 @@ function toDate(argument) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of days to be added
+ * @param {Number} amount - the amount of days to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the days added
  * @throws {TypeError} 2 arguments required
  *
@@ -103,41 +103,18 @@ function addDays(dirtyDate, dirtyAmount) {
   requiredArgs(2, arguments);
   var date = toDate(dirtyDate);
   var amount = toInteger(dirtyAmount);
+
+  if (isNaN(amount)) {
+    return new Date(NaN);
+  }
+
+  if (!amount) {
+    // If 0 days, no-op to avoid changing times in the hour before end of DST
+    return date;
+  }
+
   date.setDate(date.getDate() + amount);
   return date;
-}
-
-/**
- * @name getDaysInMonth
- * @category Month Helpers
- * @summary Get the number of days in a month of the given date.
- *
- * @description
- * Get the number of days in a month of the given date.
- *
- * ### v2.0.0 breaking changes:
- *
- * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
- *
- * @param {Date|Number} date - the given date
- * @returns {Number} the number of days in a month
- * @throws {TypeError} 1 argument required
- *
- * @example
- * // How many days are in February 2000?
- * var result = getDaysInMonth(new Date(2000, 1))
- * //=> 29
- */
-
-function getDaysInMonth(dirtyDate) {
-  requiredArgs(1, arguments);
-  var date = toDate(dirtyDate);
-  var year = date.getFullYear();
-  var monthIndex = date.getMonth();
-  var lastDayOfMonth = new Date(0);
-  lastDayOfMonth.setFullYear(year, monthIndex + 1, 0);
-  lastDayOfMonth.setHours(0, 0, 0, 0);
-  return lastDayOfMonth.getDate();
 }
 
 /**
@@ -153,7 +130,7 @@ function getDaysInMonth(dirtyDate) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of months to be added
+ * @param {Number} amount - the amount of months to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the months added
  * @throws {TypeError} 2 arguments required
  *
@@ -167,15 +144,44 @@ function addMonths(dirtyDate, dirtyAmount) {
   requiredArgs(2, arguments);
   var date = toDate(dirtyDate);
   var amount = toInteger(dirtyAmount);
-  var desiredMonth = date.getMonth() + amount;
-  var dateWithDesiredMonth = new Date(0);
-  dateWithDesiredMonth.setFullYear(date.getFullYear(), desiredMonth, 1);
-  dateWithDesiredMonth.setHours(0, 0, 0, 0);
-  var daysInMonth = getDaysInMonth(dateWithDesiredMonth); // Set the last day of the new month
-  // if the original date was the last day of the longer month
 
-  date.setMonth(desiredMonth, Math.min(daysInMonth, date.getDate()));
-  return date;
+  if (isNaN(amount)) {
+    return new Date(NaN);
+  }
+
+  if (!amount) {
+    // If 0 months, no-op to avoid changing times in the hour before end of DST
+    return date;
+  }
+
+  var dayOfMonth = date.getDate(); // The JS Date object supports date math by accepting out-of-bounds values for
+  // month, day, etc. For example, new Date(2020, 1, 0) returns 31 Dec 2019 and
+  // new Date(2020, 13, 1) returns 1 Feb 2021.  This is *almost* the behavior we
+  // want except that dates will wrap around the end of a month, meaning that
+  // new Date(2020, 13, 31) will return 3 Mar 2021 not 28 Feb 2021 as desired. So
+  // we'll default to the end of the desired month by adding 1 to the desired
+  // month and using a date of 0 to back up one day to the end of the desired
+  // month.
+
+  var endOfDesiredMonth = new Date(date.getTime());
+  endOfDesiredMonth.setMonth(date.getMonth() + amount + 1, 0);
+  var daysInMonth = endOfDesiredMonth.getDate();
+
+  if (dayOfMonth >= daysInMonth) {
+    // If we're already at the end of the month, then this is the correct date
+    // and we're done.
+    return endOfDesiredMonth;
+  } else {
+    // Otherwise, we now know that setting the original day-of-month value won't
+    // cause an overflow, so set the desired day-of-month. Note that we can't
+    // just set the date of `endOfDesiredMonth` because that object may have had
+    // its time changed in the unusual case where where a DST transition was on
+    // the last day of the month and its local time was in the hour skipped or
+    // repeated next to a DST transition.  So we use `date` instead which is
+    // guaranteed to still have the original time.
+    date.setFullYear(endOfDesiredMonth.getFullYear(), endOfDesiredMonth.getMonth(), dayOfMonth);
+    return date;
+  }
 }
 
 /**
@@ -191,7 +197,7 @@ function addMonths(dirtyDate, dirtyAmount) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of milliseconds to be added
+ * @param {Number} amount - the amount of milliseconds to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the milliseconds added
  * @throws {TypeError} 2 arguments required
  *
@@ -222,7 +228,7 @@ var MILLISECONDS_IN_HOUR = 3600000;
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of hours to be added
+ * @param {Number} amount - the amount of hours to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the hours added
  * @throws {TypeError} 2 arguments required
  *
@@ -291,6 +297,10 @@ function startOfWeek(dirtyDate, dirtyOptions) {
 }
 
 var MILLISECONDS_IN_MINUTE = 60000;
+
+function getDateMillisecondsPart(date) {
+  return date.getTime() % MILLISECONDS_IN_MINUTE;
+}
 /**
  * Google Chrome as of 67.0.3396.87 introduced timezones with offset that includes seconds.
  * They usually appear for dates that denote time before the timezones were introduced
@@ -303,11 +313,13 @@ var MILLISECONDS_IN_MINUTE = 60000;
  * This function returns the timezone offset in milliseconds that takes seconds in account.
  */
 
+
 function getTimezoneOffsetInMilliseconds(dirtyDate) {
   var date = new Date(dirtyDate.getTime());
   var baseTimezoneOffset = Math.ceil(date.getTimezoneOffset());
   date.setSeconds(0, 0);
-  var millisecondsPartOfTimezoneOffset = date.getTime() % MILLISECONDS_IN_MINUTE;
+  var hasNegativeUTCOffset = baseTimezoneOffset > 0;
+  var millisecondsPartOfTimezoneOffset = hasNegativeUTCOffset ? (MILLISECONDS_IN_MINUTE + getDateMillisecondsPart(date)) % MILLISECONDS_IN_MINUTE : getDateMillisecondsPart(date);
   return baseTimezoneOffset * MILLISECONDS_IN_MINUTE + millisecondsPartOfTimezoneOffset;
 }
 
@@ -403,7 +415,7 @@ var MILLISECONDS_IN_MINUTE$1 = 60000;
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of minutes to be added
+ * @param {Number} amount - the amount of minutes to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the minutes added
  * @throws {TypeError} 2 arguments required
  *
@@ -432,7 +444,7 @@ function addMinutes(dirtyDate, dirtyAmount) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of quarters to be added
+ * @param {Number} amount - the amount of quarters to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the quarters added
  * @throws {TypeError} 2 arguments required
  *
@@ -462,7 +474,7 @@ function addQuarters(dirtyDate, dirtyAmount) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of seconds to be added
+ * @param {Number} amount - the amount of seconds to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the seconds added
  * @throws {TypeError} 2 arguments required
  *
@@ -491,7 +503,7 @@ function addSeconds(dirtyDate, dirtyAmount) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of weeks to be added
+ * @param {Number} amount - the amount of weeks to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the weeks added
  * @throws {TypeError} 2 arguments required
  *
@@ -521,7 +533,7 @@ function addWeeks(dirtyDate, dirtyAmount) {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of years to be added
+ * @param {Number} amount - the amount of years to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the years added
  * @throws {TypeError} 2 arguments required
  *
@@ -721,13 +733,37 @@ function differenceInCalendarYears(dirtyDateLeft, dirtyDateRight) {
   return dateLeft.getFullYear() - dateRight.getFullYear();
 }
 
+// for accurate equality comparisons of UTC timestamps that end up
+// having the same representation in local time, e.g. one hour before
+// DST ends vs. the instant that DST ends.
+
+function compareLocalAsc(dateLeft, dateRight) {
+  var diff = dateLeft.getFullYear() - dateRight.getFullYear() || dateLeft.getMonth() - dateRight.getMonth() || dateLeft.getDate() - dateRight.getDate() || dateLeft.getHours() - dateRight.getHours() || dateLeft.getMinutes() - dateRight.getMinutes() || dateLeft.getSeconds() - dateRight.getSeconds() || dateLeft.getMilliseconds() - dateRight.getMilliseconds();
+
+  if (diff < 0) {
+    return -1;
+  } else if (diff > 0) {
+    return 1; // Return 0 if diff is 0; return NaN if diff is NaN
+  } else {
+    return diff;
+  }
+}
 /**
  * @name differenceInDays
  * @category Day Helpers
  * @summary Get the number of full days between the given dates.
  *
  * @description
- * Get the number of full day periods between the given dates.
+ * Get the number of full day periods between two dates. Fractional days are
+ * truncated towards zero.
+ *
+ * One "full day" is the distance between a local time in one day to the same
+ * local time on the next or previous day. A full day can sometimes be less than
+ * or more than 24 hours if a daylight savings change happens between two dates.
+ *
+ * To ignore DST and only measure exact 24-hour periods, use this instead:
+ * `Math.floor(differenceInHours(dateLeft, dateRight)/24)|0`.
+ *
  *
  * ### v2.0.0 breaking changes:
  *
@@ -735,7 +771,7 @@ function differenceInCalendarYears(dirtyDateLeft, dirtyDateRight) {
  *
  * @param {Date|Number} dateLeft - the later date
  * @param {Date|Number} dateRight - the earlier date
- * @returns {Number} the number of full days
+ * @returns {Number} the number of full days according to the local timezone
  * @throws {TypeError} 2 arguments required
  *
  * @example
@@ -746,25 +782,37 @@ function differenceInCalendarYears(dirtyDateLeft, dirtyDateRight) {
  *   new Date(2011, 6, 2, 23, 0)
  * )
  * //=> 365
- * // How many days are between
+ * // How many full days are between
  * // 2 July 2011 23:59:00 and 3 July 2011 00:01:00?
  * var result = differenceInDays(
  *   new Date(2011, 6, 3, 0, 1),
  *   new Date(2011, 6, 2, 23, 59)
  * )
  * //=> 0
+ * // How many full days are between
+ * // 1 March 2020 0:00 and 1 June 2020 0:00 ?
+ * // Note: because local time is used, the
+ * // result will always be 92 days, even in
+ * // time zones where DST starts and the
+ * // period has only 92*24-1 hours.
+ * var result = differenceInDays(
+ *   new Date(2020, 5, 1),
+ *   new Date(2020, 2, 1)
+ * )
+//=> 92
  */
+
 
 function differenceInDays(dirtyDateLeft, dirtyDateRight) {
   requiredArgs(2, arguments);
   var dateLeft = toDate(dirtyDateLeft);
   var dateRight = toDate(dirtyDateRight);
-  var sign = compareAsc(dateLeft, dateRight);
+  var sign = compareLocalAsc(dateLeft, dateRight);
   var difference = Math.abs(differenceInCalendarDays(dateLeft, dateRight));
   dateLeft.setDate(dateLeft.getDate() - sign * difference); // Math.abs(diff in full days - diff in calendar days) === 1 if last calendar day is not full
   // If so, result must be decreased by 1 in absolute value
 
-  var isLastDayNotFull = compareAsc(dateLeft, dateRight) === -sign;
+  var isLastDayNotFull = compareLocalAsc(dateLeft, dateRight) === -sign;
   var result = sign * (difference - isLastDayNotFull); // Prevent negative zero
 
   return result === 0 ? 0 : result;
@@ -984,7 +1032,16 @@ function differenceInSeconds(dirtyDateLeft, dirtyDateRight) {
  * @summary Get the number of full weeks between the given dates.
  *
  * @description
- * Get the number of full weeks between the given dates.
+ * Get the number of full weeks between two dates. Fractional weeks are
+ * truncated towards zero.
+ *
+ * One "full week" is the distance between a local time in one day to the same
+ * local time 7 days earlier or later. A full week can sometimes be less than
+ * or more than 7*24 hours if a daylight savings change happens between two dates.
+ *
+ * To ignore DST and only measure exact 7*24-hour periods, use this instead:
+ * `Math.floor(differenceInHours(dateLeft, dateRight)/(7*24))|0`.
+ *
  *
  * ### v2.0.0 breaking changes:
  *
@@ -999,6 +1056,18 @@ function differenceInSeconds(dirtyDateLeft, dirtyDateRight) {
  * // How many full weeks are between 5 July 2014 and 20 July 2014?
  * var result = differenceInWeeks(new Date(2014, 6, 20), new Date(2014, 6, 5))
  * //=> 2
+ *
+ * // How many full weeks are between
+ * // 1 March 2020 0:00 and 6 June 2020 0:00 ?
+ * // Note: because local time is used, the
+ * // result will always be 8 weeks (54 days),
+ * // even if DST starts and the period has
+ * // only 54*24-1 hours.
+ * var result = differenceInWeeks(
+ *   new Date(2020, 5, 1),
+ *   new Date(2020, 2, 6)
+ * )
+ * //=> 8
  */
 
 function differenceInWeeks(dirtyDateLeft, dirtyDateRight) {
@@ -1035,14 +1104,50 @@ function differenceInYears(dirtyDateLeft, dirtyDateRight) {
   var dateLeft = toDate(dirtyDateLeft);
   var dateRight = toDate(dirtyDateRight);
   var sign = compareAsc(dateLeft, dateRight);
-  var difference = Math.abs(differenceInCalendarYears(dateLeft, dateRight));
-  dateLeft.setFullYear(dateLeft.getFullYear() - sign * difference); // Math.abs(diff in full years - diff in calendar years) === 1 if last calendar year is not full
+  var difference = Math.abs(differenceInCalendarYears(dateLeft, dateRight)); // Set both dates to a valid leap year for accurate comparison when dealing
+  // with leap days
+
+  dateLeft.setFullYear('1584');
+  dateRight.setFullYear('1584'); // Math.abs(diff in full years - diff in calendar years) === 1 if last calendar year is not full
   // If so, result must be decreased by 1 in absolute value
 
   var isLastYearNotFull = compareAsc(dateLeft, dateRight) === -sign;
   var result = sign * (difference - isLastYearNotFull); // Prevent negative zero
 
   return result === 0 ? 0 : result;
+}
+
+/**
+ * @name startOfQuarter
+ * @category Quarter Helpers
+ * @summary Return the start of a year quarter for the given date.
+ *
+ * @description
+ * Return the start of a year quarter for the given date.
+ * The result will be in the local timezone.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the original date
+ * @returns {Date} the start of a quarter
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // The start of a quarter for 2 September 2014 11:55:00:
+ * var result = startOfQuarter(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Tue Jul 01 2014 00:00:00
+ */
+
+function startOfQuarter(dirtyDate) {
+  requiredArgs(1, arguments);
+  var date = toDate(dirtyDate);
+  var currentMonth = date.getMonth();
+  var month = currentMonth - currentMonth % 3;
+  date.setMonth(month, 1);
+  date.setHours(0, 0, 0, 0);
+  return date;
 }
 
 /**
@@ -1407,6 +1512,14 @@ var formatDistanceLocale = {
     one: '1 day',
     other: '{{count}} days'
   },
+  aboutXWeeks: {
+    one: 'about 1 week',
+    other: 'about {{count}} weeks'
+  },
+  xWeeks: {
+    one: '1 week',
+    other: '{{count}} weeks'
+  },
   aboutXMonths: {
     one: 'about 1 month',
     other: 'about {{count}} months'
@@ -1724,11 +1837,11 @@ function buildMatchFn(args) {
 
     if (Object.prototype.toString.call(parsePatterns) === '[object Array]') {
       value = findIndex(parsePatterns, function (pattern) {
-        return pattern.test(string);
+        return pattern.test(matchedString);
       });
     } else {
       value = findKey(parsePatterns, function (pattern) {
-        return pattern.test(string);
+        return pattern.test(matchedString);
       });
     }
 
@@ -1891,7 +2004,7 @@ var locale = {
  * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
  *
  * @param {Date|Number} date - the date to be changed
- * @param {Number} amount - the amount of milliseconds to be subtracted
+ * @param {Number} amount - the amount of milliseconds to be subtracted. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
  * @returns {Date} the new date with the milliseconds subtracted
  * @throws {TypeError} 2 arguments required
  *
@@ -3113,15 +3226,15 @@ function isProtectedDayOfYearToken(token) {
 function isProtectedWeekYearToken(token) {
   return protectedWeekYearTokens.indexOf(token) !== -1;
 }
-function throwProtectedError(token) {
+function throwProtectedError(token, format, input) {
   if (token === 'YYYY') {
-    throw new RangeError('Use `yyyy` instead of `YYYY` for formatting years; see: https://git.io/fxCyr');
+    throw new RangeError("Use `yyyy` instead of `YYYY` (in `".concat(format, "`) for formatting years to the input `").concat(input, "`; see: https://git.io/fxCyr"));
   } else if (token === 'YY') {
-    throw new RangeError('Use `yy` instead of `YY` for formatting years; see: https://git.io/fxCyr');
+    throw new RangeError("Use `yy` instead of `YY` (in `".concat(format, "`) for formatting years to the input `").concat(input, "`; see: https://git.io/fxCyr"));
   } else if (token === 'D') {
-    throw new RangeError('Use `d` instead of `D` for formatting days of the month; see: https://git.io/fxCyr');
+    throw new RangeError("Use `d` instead of `D` (in `".concat(format, "`) for formatting days of the month to the input `").concat(input, "`; see: https://git.io/fxCyr"));
   } else if (token === 'DD') {
-    throw new RangeError('Use `dd` instead of `DD` for formatting days of the month; see: https://git.io/fxCyr');
+    throw new RangeError("Use `dd` instead of `DD` (in `".concat(format, "`) for formatting days of the month to the input `").concat(input, "`; see: https://git.io/fxCyr"));
   }
 }
 
@@ -3228,28 +3341,28 @@ var unescapedLatinCharacterRegExp = /[a-zA-Z]/;
  * |                                 | DD      | 01, 02, ..., 365, 366             | 9     |
  * |                                 | DDD     | 001, 002, ..., 365, 366           |       |
  * |                                 | DDDD    | ...                               | 3     |
- * | Day of week (formatting)        | E..EEE  | Mon, Tue, Wed, ..., Su            |       |
+ * | Day of week (formatting)        | E..EEE  | Mon, Tue, Wed, ..., Sun           |       |
  * |                                 | EEEE    | Monday, Tuesday, ..., Sunday      | 2     |
  * |                                 | EEEEE   | M, T, W, T, F, S, S               |       |
  * |                                 | EEEEEE  | Mo, Tu, We, Th, Fr, Su, Sa        |       |
  * | ISO day of week (formatting)    | i       | 1, 2, 3, ..., 7                   | 7     |
  * |                                 | io      | 1st, 2nd, ..., 7th                | 7     |
  * |                                 | ii      | 01, 02, ..., 07                   | 7     |
- * |                                 | iii     | Mon, Tue, Wed, ..., Su            | 7     |
+ * |                                 | iii     | Mon, Tue, Wed, ..., Sun           | 7     |
  * |                                 | iiii    | Monday, Tuesday, ..., Sunday      | 2,7   |
  * |                                 | iiiii   | M, T, W, T, F, S, S               | 7     |
  * |                                 | iiiiii  | Mo, Tu, We, Th, Fr, Su, Sa        | 7     |
  * | Local day of week (formatting)  | e       | 2, 3, 4, ..., 1                   |       |
  * |                                 | eo      | 2nd, 3rd, ..., 1st                | 7     |
  * |                                 | ee      | 02, 03, ..., 01                   |       |
- * |                                 | eee     | Mon, Tue, Wed, ..., Su            |       |
+ * |                                 | eee     | Mon, Tue, Wed, ..., Sun           |       |
  * |                                 | eeee    | Monday, Tuesday, ..., Sunday      | 2     |
  * |                                 | eeeee   | M, T, W, T, F, S, S               |       |
  * |                                 | eeeeee  | Mo, Tu, We, Th, Fr, Su, Sa        |       |
  * | Local day of week (stand-alone) | c       | 2, 3, 4, ..., 1                   |       |
  * |                                 | co      | 2nd, 3rd, ..., 1st                | 7     |
  * |                                 | cc      | 02, 03, ..., 01                   |       |
- * |                                 | ccc     | Mon, Tue, Wed, ..., Su            |       |
+ * |                                 | ccc     | Mon, Tue, Wed, ..., Sun           |       |
  * |                                 | cccc    | Monday, Tuesday, ..., Sunday      | 2     |
  * |                                 | ccccc   | M, T, W, T, F, S, S               |       |
  * |                                 | cccccc  | Mo, Tu, We, Th, Fr, Su, Sa        |       |
@@ -3270,7 +3383,7 @@ var unescapedLatinCharacterRegExp = /[a-zA-Z]/;
  * |                                 | HH      | 00, 01, 02, ..., 23               |       |
  * | Hour [0-11]                     | K       | 1, 2, ..., 11, 0                  |       |
  * |                                 | Ko      | 1st, 2nd, ..., 11th, 0th          | 7     |
- * |                                 | KK      | 1, 2, ..., 11, 0                  |       |
+ * |                                 | KK      | 01, 02, ..., 11, 00               |       |
  * | Hour [1-24]                     | k       | 24, 1, 2, ..., 23                 |       |
  * |                                 | ko      | 24th, 1st, 2nd, ..., 23rd         | 7     |
  * |                                 | kk      | 24, 01, 02, ..., 23               |       |
@@ -3428,10 +3541,10 @@ var unescapedLatinCharacterRegExp = /[a-zA-Z]/;
  * @throws {RangeError} `options.locale` must contain `formatLong` property
  * @throws {RangeError} `options.weekStartsOn` must be between 0 and 6
  * @throws {RangeError} `options.firstWeekContainsDate` must be between 1 and 7
- * @throws {RangeError} use `yyyy` instead of `YYYY` for formatting years; see: https://git.io/fxCyr
- * @throws {RangeError} use `yy` instead of `YY` for formatting years; see: https://git.io/fxCyr
- * @throws {RangeError} use `d` instead of `D` for formatting days of the month; see: https://git.io/fxCyr
- * @throws {RangeError} use `dd` instead of `DD` for formatting days of the month; see: https://git.io/fxCyr
+ * @throws {RangeError} use `yyyy` instead of `YYYY` for formatting years using [format provided] to the input [input provided]; see: https://git.io/fxCyr
+ * @throws {RangeError} use `yy` instead of `YY` for formatting years using [format provided] to the input [input provided]; see: https://git.io/fxCyr
+ * @throws {RangeError} use `d` instead of `D` for formatting days of the month using [format provided] to the input [input provided]; see: https://git.io/fxCyr
+ * @throws {RangeError} use `dd` instead of `DD` for formatting days of the month using [format provided] to the input [input provided]; see: https://git.io/fxCyr
  * @throws {RangeError} format string contains an unescaped latin alphabet character
  *
  * @example
@@ -3524,11 +3637,11 @@ function format(dirtyDate, dirtyFormatStr, dirtyOptions) {
 
     if (formatter) {
       if (!options.useAdditionalWeekYearTokens && isProtectedWeekYearToken(substring)) {
-        throwProtectedError(substring);
+        throwProtectedError(substring, dirtyFormatStr, dirtyDate);
       }
 
       if (!options.useAdditionalDayOfYearTokens && isProtectedDayOfYearToken(substring)) {
-        throwProtectedError(substring);
+        throwProtectedError(substring, dirtyFormatStr, dirtyDate);
       }
 
       return formatter(utcDate, substring, locale$1.localize, formatterOptions);
@@ -3561,129 +3674,6 @@ function assign(target, dirtyObject) {
   }
 
   return target;
-}
-
-/**
- * @name startOfHour
- * @category Hour Helpers
- * @summary Return the start of an hour for the given date.
- *
- * @description
- * Return the start of an hour for the given date.
- * The result will be in the local timezone.
- *
- * ### v2.0.0 breaking changes:
- *
- * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
- *
- * @param {Date|Number} date - the original date
- * @returns {Date} the start of an hour
- * @throws {TypeError} 1 argument required
- *
- * @example
- * // The start of an hour for 2 September 2014 11:55:00:
- * var result = startOfHour(new Date(2014, 8, 2, 11, 55))
- * //=> Tue Sep 02 2014 11:00:00
- */
-
-function startOfHour(dirtyDate) {
-  requiredArgs(1, arguments);
-  var date = toDate(dirtyDate);
-  date.setMinutes(0, 0, 0);
-  return date;
-}
-
-/**
- * @name startOfMinute
- * @category Minute Helpers
- * @summary Return the start of a minute for the given date.
- *
- * @description
- * Return the start of a minute for the given date.
- * The result will be in the local timezone.
- *
- * ### v2.0.0 breaking changes:
- *
- * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
- *
- * @param {Date|Number} date - the original date
- * @returns {Date} the start of a minute
- * @throws {TypeError} 1 argument required
- *
- * @example
- * // The start of a minute for 1 December 2014 22:15:45.400:
- * var result = startOfMinute(new Date(2014, 11, 1, 22, 15, 45, 400))
- * //=> Mon Dec 01 2014 22:15:00
- */
-
-function startOfMinute(dirtyDate) {
-  requiredArgs(1, arguments);
-  var date = toDate(dirtyDate);
-  date.setSeconds(0, 0);
-  return date;
-}
-
-/**
- * @name startOfQuarter
- * @category Quarter Helpers
- * @summary Return the start of a year quarter for the given date.
- *
- * @description
- * Return the start of a year quarter for the given date.
- * The result will be in the local timezone.
- *
- * ### v2.0.0 breaking changes:
- *
- * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
- *
- * @param {Date|Number} date - the original date
- * @returns {Date} the start of a quarter
- * @throws {TypeError} 1 argument required
- *
- * @example
- * // The start of a quarter for 2 September 2014 11:55:00:
- * var result = startOfQuarter(new Date(2014, 8, 2, 11, 55, 0))
- * //=> Tue Jul 01 2014 00:00:00
- */
-
-function startOfQuarter(dirtyDate) {
-  requiredArgs(1, arguments);
-  var date = toDate(dirtyDate);
-  var currentMonth = date.getMonth();
-  var month = currentMonth - currentMonth % 3;
-  date.setMonth(month, 1);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-/**
- * @name startOfSecond
- * @category Second Helpers
- * @summary Return the start of a second for the given date.
- *
- * @description
- * Return the start of a second for the given date.
- * The result will be in the local timezone.
- *
- * ### v2.0.0 breaking changes:
- *
- * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
- *
- * @param {Date|Number} date - the original date
- * @returns {Date} the start of a second
- * @throws {TypeError} 1 argument required
- *
- * @example
- * // The start of a second for 1 December 2014 22:15:45.400:
- * var result = startOfSecond(new Date(2014, 11, 1, 22, 15, 45, 400))
- * //=> Mon Dec 01 2014 22:15:45.000
- */
-
-function startOfSecond(dirtyDate) {
-  requiredArgs(1, arguments);
-  var date = toDate(dirtyDate);
-  date.setMilliseconds(0);
-  return date;
 }
 
 // See issue: https://github.com/date-fns/date-fns/issues/376
@@ -4454,6 +4444,7 @@ var parsers = {
   // Day of the month
   d: {
     priority: 90,
+    subPriority: 1,
     parse: function (string, token, match, _options) {
       switch (token) {
         case 'd':
@@ -4489,6 +4480,7 @@ var parsers = {
   // Day of year
   D: {
     priority: 90,
+    subPriority: 1,
     parse: function (string, token, match, _options) {
       switch (token) {
         case 'D':
@@ -5402,7 +5394,7 @@ var unescapedLatinCharacterRegExp$1 = /[a-zA-Z]/;
  * |                                 |     | HH      | 00, 01, 02, ..., 23               |       |
  * | Hour [0-11]                     |  70 | K       | 1, 2, ..., 11, 0                  |       |
  * |                                 |     | Ko      | 1st, 2nd, ..., 11th, 0th          | 5     |
- * |                                 |     | KK      | 1, 2, ..., 11, 0                  |       |
+ * |                                 |     | KK      | 01, 02, ..., 11, 00               |       |
  * | Hour [1-24]                     |  70 | k       | 24, 1, 2, ..., 23                 |       |
  * |                                 |     | ko      | 24th, 1st, 2nd, ..., 23rd         | 5     |
  * |                                 |     | kk      | 24, 01, 02, ..., 23               |       |
@@ -5472,7 +5464,7 @@ var unescapedLatinCharacterRegExp$1 = /[a-zA-Z]/;
  *    | BC 1 |   1 |   0 |
  *    | BC 2 |   2 |  -1 |
  *
- *    Also `yy` will try to guess the century of two digit year by proximity with `backupDate`:
+ *    Also `yy` will try to guess the century of two digit year by proximity with `referenceDate`:
  *
  *    `parse('50', 'yy', new Date(2018, 0, 1)) //=> Sat Jan 01 2050 00:00:00`
  *
@@ -5515,18 +5507,18 @@ var unescapedLatinCharacterRegExp$1 = /[a-zA-Z]/;
  * Units of an equal priority overwrite each other in the order of appearance.
  *
  * If no values of higher priority are parsed (e.g. when parsing string 'January 1st' without a year),
- * the values will be taken from 3rd argument `backupDate` which works as a context of parsing.
+ * the values will be taken from 3rd argument `referenceDate` which works as a context of parsing.
  *
- * `backupDate` must be passed for correct work of the function.
- * If you're not sure which `backupDate` to supply, create a new instance of Date:
+ * `referenceDate` must be passed for correct work of the function.
+ * If you're not sure which `referenceDate` to supply, create a new instance of Date:
  * `parse('02/11/2014', 'MM/dd/yyyy', new Date())`
  * In this case parsing will be done in the context of the current date.
- * If `backupDate` is `Invalid Date` or a value not convertible to valid `Date`,
+ * If `referenceDate` is `Invalid Date` or a value not convertible to valid `Date`,
  * then `Invalid Date` will be returned.
  *
  * The result may vary by locale.
  *
- * If `formatString` matches with `dateString` but does not provides tokens, `backupDate` will be returned.
+ * If `formatString` matches with `dateString` but does not provides tokens, `referenceDate` will be returned.
  *
  * If parsing failed, `Invalid Date` will be returned.
  * Invalid Date is a Date, whose time value is NaN.
@@ -5550,7 +5542,7 @@ var unescapedLatinCharacterRegExp$1 = /[a-zA-Z]/;
  *
  * @param {String} dateString - the string to parse
  * @param {String} formatString - the string of tokens
- * @param {Date|Number} backupDate - defines values missing from the parsed dateString
+ * @param {Date|Number} referenceDate - defines values missing from the parsed dateString
  * @param {Object} [options] - an object with options.
  * @param {Locale} [options.locale=defaultLocale] - the locale object. See [Locale]{@link https://date-fns.org/docs/Locale}
  * @param {0|1|2|3|4|5|6} [options.weekStartsOn=0] - the index of the first day of the week (0 - Sunday)
@@ -5564,10 +5556,10 @@ var unescapedLatinCharacterRegExp$1 = /[a-zA-Z]/;
  * @throws {RangeError} `options.weekStartsOn` must be between 0 and 6
  * @throws {RangeError} `options.firstWeekContainsDate` must be between 1 and 7
  * @throws {RangeError} `options.locale` must contain `match` property
- * @throws {RangeError} use `yyyy` instead of `YYYY` for formatting years; see: https://git.io/fxCyr
- * @throws {RangeError} use `yy` instead of `YY` for formatting years; see: https://git.io/fxCyr
- * @throws {RangeError} use `d` instead of `D` for formatting days of the month; see: https://git.io/fxCyr
- * @throws {RangeError} use `dd` instead of `DD` for formatting days of the month; see: https://git.io/fxCyr
+ * @throws {RangeError} use `yyyy` instead of `YYYY` for formatting years using [format provided] to the input [input provided]; see: https://git.io/fxCyr
+ * @throws {RangeError} use `yy` instead of `YY` for formatting years using [format provided] to the input [input provided]; see: https://git.io/fxCyr
+ * @throws {RangeError} use `d` instead of `D` for formatting days of the month using [format provided] to the input [input provided]; see: https://git.io/fxCyr
+ * @throws {RangeError} use `dd` instead of `DD` for formatting days of the month using [format provided] to the input [input provided]; see: https://git.io/fxCyr
  * @throws {RangeError} format string contains an unescaped latin alphabet character
  *
  * @example
@@ -5584,7 +5576,7 @@ var unescapedLatinCharacterRegExp$1 = /[a-zA-Z]/;
  * //=> Sun Feb 28 2010 00:00:00
  */
 
-function parse(dirtyDateString, dirtyFormatString, dirtyBackupDate, dirtyOptions) {
+function parse(dirtyDateString, dirtyFormatString, dirtyReferenceDate, dirtyOptions) {
   requiredArgs(3, arguments);
   var dateString = String(dirtyDateString);
   var formatString = String(dirtyFormatString);
@@ -5613,7 +5605,7 @@ function parse(dirtyDateString, dirtyFormatString, dirtyBackupDate, dirtyOptions
 
   if (formatString === '') {
     if (dateString === '') {
-      return toDate(dirtyBackupDate);
+      return toDate(dirtyReferenceDate);
     } else {
       return new Date(NaN);
     }
@@ -5627,6 +5619,7 @@ function parse(dirtyDateString, dirtyFormatString, dirtyBackupDate, dirtyOptions
   };
   var setters = [{
     priority: TIMEZONE_UNIT_PRIORITY,
+    subPriority: -1,
     set: dateToSystemTimezone,
     index: 0
   }];
@@ -5647,11 +5640,11 @@ function parse(dirtyDateString, dirtyFormatString, dirtyBackupDate, dirtyOptions
     var token = tokens[i];
 
     if (!options.useAdditionalWeekYearTokens && isProtectedWeekYearToken(token)) {
-      throwProtectedError(token);
+      throwProtectedError(token, formatString, dirtyDateString);
     }
 
     if (!options.useAdditionalDayOfYearTokens && isProtectedDayOfYearToken(token)) {
-      throwProtectedError(token);
+      throwProtectedError(token, formatString, dirtyDateString);
     }
 
     var firstCharacter = token[0];
@@ -5691,6 +5684,7 @@ function parse(dirtyDateString, dirtyFormatString, dirtyBackupDate, dirtyOptions
 
       setters.push({
         priority: parser.priority,
+        subPriority: parser.subPriority || 0,
         set: parser.set,
         validate: parser.validate,
         value: parseResult.value,
@@ -5732,11 +5726,13 @@ function parse(dirtyDateString, dirtyFormatString, dirtyBackupDate, dirtyOptions
   }).map(function (priority) {
     return setters.filter(function (setter) {
       return setter.priority === priority;
-    }).reverse();
+    }).sort(function (a, b) {
+      return b.subPriority - a.subPriority;
+    });
   }).map(function (setterArray) {
     return setterArray[0];
   });
-  var date = toDate(dirtyBackupDate);
+  var date = toDate(dirtyReferenceDate);
 
   if (isNaN(date)) {
     return new Date(NaN);
@@ -5781,6 +5777,96 @@ function dateToSystemTimezone(date, flags) {
 
 function cleanEscapedString$1(input) {
   return input.match(escapedStringRegExp$1)[1].replace(doubleQuoteRegExp$1, "'");
+}
+
+/**
+ * @name startOfHour
+ * @category Hour Helpers
+ * @summary Return the start of an hour for the given date.
+ *
+ * @description
+ * Return the start of an hour for the given date.
+ * The result will be in the local timezone.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the original date
+ * @returns {Date} the start of an hour
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // The start of an hour for 2 September 2014 11:55:00:
+ * var result = startOfHour(new Date(2014, 8, 2, 11, 55))
+ * //=> Tue Sep 02 2014 11:00:00
+ */
+
+function startOfHour(dirtyDate) {
+  requiredArgs(1, arguments);
+  var date = toDate(dirtyDate);
+  date.setMinutes(0, 0, 0);
+  return date;
+}
+
+/**
+ * @name startOfMinute
+ * @category Minute Helpers
+ * @summary Return the start of a minute for the given date.
+ *
+ * @description
+ * Return the start of a minute for the given date.
+ * The result will be in the local timezone.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the original date
+ * @returns {Date} the start of a minute
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // The start of a minute for 1 December 2014 22:15:45.400:
+ * var result = startOfMinute(new Date(2014, 11, 1, 22, 15, 45, 400))
+ * //=> Mon Dec 01 2014 22:15:00
+ */
+
+function startOfMinute(dirtyDate) {
+  requiredArgs(1, arguments);
+  var date = toDate(dirtyDate);
+  date.setSeconds(0, 0);
+  return date;
+}
+
+/**
+ * @name startOfSecond
+ * @category Second Helpers
+ * @summary Return the start of a second for the given date.
+ *
+ * @description
+ * Return the start of a second for the given date.
+ * The result will be in the local timezone.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the original date
+ * @returns {Date} the start of a second
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // The start of a second for 1 December 2014 22:15:45.400:
+ * var result = startOfSecond(new Date(2014, 11, 1, 22, 15, 45, 400))
+ * //=> Mon Dec 01 2014 22:15:45.000
+ */
+
+function startOfSecond(dirtyDate) {
+  requiredArgs(1, arguments);
+  var date = toDate(dirtyDate);
+  date.setMilliseconds(0);
+  return date;
 }
 
 var MILLISECONDS_IN_HOUR$3 = 3600000;
@@ -5896,23 +5982,15 @@ function parseISO(argument, dirtyOptions) {
       return new Date(NaN);
     }
   } else {
-    var fullTime = timestamp + time;
-    var fullTimeDate = new Date(fullTime);
-    offset = getTimezoneOffsetInMilliseconds(fullTimeDate); // Adjust time when it's coming from DST
+    var dirtyDate = new Date(timestamp + time); // js parsed string assuming it's in UTC timezone
+    // but we need it to be parsed in our timezone
+    // so we use utc values to build date in our timezone.
+    // Year values from 0 to 99 map to the years 1900 to 1999
+    // so set year explicitly with setFullYear.
 
-    var fullTimeDateDiffDay = new Date(fullTime);
-
-    if (offset > 0) {
-      fullTimeDateDiffDay.setDate(fullTimeDate.getDate() + 1);
-    } else {
-      fullTimeDateDiffDay.setDate(fullTimeDate.getDate() - 1);
-    }
-
-    var offsetDiff = getTimezoneOffsetInMilliseconds(fullTimeDateDiffDay) - offset;
-
-    if (offsetDiff > 0) {
-      offset += offsetDiff;
-    }
+    var result = new Date(dirtyDate.getUTCFullYear(), dirtyDate.getUTCMonth(), dirtyDate.getUTCDate(), dirtyDate.getUTCHours(), dirtyDate.getUTCMinutes(), dirtyDate.getUTCSeconds(), dirtyDate.getUTCMilliseconds());
+    result.setFullYear(dirtyDate.getUTCFullYear());
+    return result;
   }
 
   return new Date(timestamp + time + offset);
@@ -5921,7 +5999,12 @@ function parseISO(argument, dirtyOptions) {
 function splitDateString(dateString) {
   var dateStrings = {};
   var array = dateString.split(patterns.dateTimeDelimiter);
-  var timeString;
+  var timeString; // The regex match should only return at maximum two array elements.
+  // [date], [time], or [date, time].
+
+  if (array.length > 2) {
+    return dateStrings;
+  }
 
   if (/:/.test(array[0])) {
     dateStrings.date = null;
@@ -6075,7 +6158,7 @@ function validateTimezone(_hours, minutes) {
   return minutes >= 0 && minutes <= 59;
 }
 
-var FORMATS = {
+const FORMATS = {
 	datetime: 'MMM d, yyyy, h:mm:ss aaaa',
 	millisecond: 'h:mm:ss.SSS aaaa',
 	second: 'h:mm:ss aaaa',
@@ -6096,10 +6179,10 @@ chart_js._adapters._date.override({
 	},
 
 	parse: function(value, fmt) {
-		if (chart_js.helpers.isNullOrUndef(value)) {
+		if (value === null || typeof value === 'undefined') {
 			return null;
 		}
-		var type = typeof value;
+		const type = typeof value;
 		if (type === 'number' || value instanceof Date) {
 			value = toDate(value);
 		} else if (type === 'string') {

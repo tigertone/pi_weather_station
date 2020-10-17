@@ -34,7 +34,7 @@
     <div class="chartContainer" id="chartContainerID">
 	</div>
 	
-	<table id="currentData" style="display: table; margin:0 auto; padding:0">
+	<table class="summaryTable" id="currentTable" style="display: table">
 		<tr>
 			<td colspan ="5"><img src="icon_180x180.png" alt="Outdoor" style="display:block; margin-left:auto; margin-right:auto;height:2.5em; padding:1.5em"></td>
 		</tr>
@@ -75,17 +75,30 @@
 		</table>
 		
 
-    <div id="status">
+    <table class="summaryTable" id="statusTable" style="display: table">
 
-        Internal status: <span id="statusInternal"></span><br/>
-        External status: <span id="statusExternal"></span><br/>
-		Battery: <span id="statusVoltageExternal"></span><br/>
-        External success rate: <span id="statusPercentExternal"></span><br/>
+        <tr>
+        	<td style="text-align:right">Internal status:</td>
+        	<td style="text-align:left"><span id="statusInternal"></span></td>
+        </tr>
+        <tr>
+        	<td style="text-align:right">External status:</td>
+        	<td style="text-align:left"><span id="statusExternal"></span> (<span id="statusPercentExternal"></span>)</td>
+        </tr>
+		<tr>
+			<td style="text-align:right">Battery:</td>
+			<td style="text-align:left"><span id="statusVoltageExternal"></span></td>
+		</tr>
+		<tr>
+			<td style="text-align:right">Disk space remaining:</td>
+			<td style="text-align:left"><span id="statusSpaceMb"></span> (<span id="statusSpacePercent"></span>)</td>
+		</tr>
+		
+		
+    </table>
 
-    </div>
-
-    <script src="/chartJs_3.0.0/Chart.min.js"></script>
-    <script src="/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="/chartJs_3.0.0/chart.js"></script>
+    <script src="/chartjs-adapter-date-fns/chartjs-adapter-date-fns.bundle.js"></script>
     <script src="/weatherPortal.js"></script>
 </body>
 </html>

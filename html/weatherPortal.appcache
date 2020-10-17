@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 25-04-2020:v1
+# 17-10-2020:v3
 
 # Explicitly cached 'master entries'.
 CACHE:
@@ -11,8 +11,8 @@ getStatus.php
 weatherPortal.css
 weatherPortal.js
 manifest.json
-chartJs_3.0.0/Chart.min.js
-chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js
+chartJs_3.0.0/chart.min.js
+chartjs-adapter-date-fns/chartjs-adapter-date-fns.bundle.min.js
 
 # Resources that require the user to be online
 NETWORK:

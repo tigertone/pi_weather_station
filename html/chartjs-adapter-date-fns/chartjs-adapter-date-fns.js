@@ -1,5 +1,5 @@
 /*!
- * chartjs-adapter-date-fns v1.0.0
+ * chartjs-adapter-date-fns v1.1.0-alpha.3
  * https://www.chartjs.org
  * (c) 2020 Chart.js Contributors
  * Released under the MIT license
@@ -10,7 +10,7 @@ typeof define === 'function' && define.amd ? define(['chart.js', 'date-fns'], fa
 (global = global || self, factory(global.Chart, global.dateFns));
 }(this, (function (chart_js, dateFns) { 'use strict';
 
-var FORMATS = {
+const FORMATS = {
 	datetime: 'MMM d, yyyy, h:mm:ss aaaa',
 	millisecond: 'h:mm:ss.SSS aaaa',
 	second: 'h:mm:ss aaaa',
@@ -31,10 +31,10 @@ chart_js._adapters._date.override({
 	},
 
 	parse: function(value, fmt) {
-		if (chart_js.helpers.isNullOrUndef(value)) {
+		if (value === null || typeof value === 'undefined') {
 			return null;
 		}
-		var type = typeof value;
+		const type = typeof value;
 		if (type === 'number' || value instanceof Date) {
 			value = dateFns.toDate(value);
 		} else if (type === 'string') {

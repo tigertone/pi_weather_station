@@ -13,6 +13,8 @@ $dbname="weather_records";
 
 
 $dataOut = new stdClass();
+$dataOut->spaceRemainingMb = intval((disk_free_space("/")/1e6) + 0.5);
+$dataOut->spaceRemainingPercent = intval(($dataOut->spaceRemainingMb / (disk_total_space("/") /1e6) * 100) + 0.5);
 
 // Create connection
 $conn=mysqli_connect($servername, $username, $password, $dbname);
