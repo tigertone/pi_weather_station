@@ -85,34 +85,10 @@ CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sample
 
 create index by_date on dailyExtremes (sampledDate);
 
-# If adding data at a later date
-INSERT INTO dailyExtremes (sampledDate, decidegreesHigh, decidegreesLow,pressureHigh,pressureLow,humidityHigh,humidityLow) SELECT DATE(GMT) as day, max(decidegrees) as maxTemp, MIN(decidegrees) as minTemp, max(Pressure) as maxPressure, MIN(Pressure) as minPressure, max(Humidity) as maxHumidity, MIN(Humidity) as minHumidity from sensor_data WHERE GMT > DATE_SUB(NOW(), INTERVAL 1 YEAR) group by day;
-
-
-
-CREATE USER 'database_writer'@'localhost' IDENTIFIED BY 'PASSWORD'; <br>
-GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'; <br>
-CREATE USER 'database_reader'@'localhost' IDENTIFIED BY 'PASSWORD'; <br>
-GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost'; <br>
-FLUSH PRIVILEGES; <br>
 quit <br>
 
 # To view table
-select * from sensor_data; <br>
-
-# Copy php file so that it can be found by apache
-cd /var/www/html <br>
-sudo rm index.html <br>
-sudo nano display_current_data.php <br>
-
-
-
-# Install latest version of node.js
-npm install chart.js --save<br>
-cp ./node_modules/chart.js/dist/Chart.bundle.js ./pi_weather_station/php/chartJs_2.7.2		% Copy to php folder<br>
-cp ./node_modules/chart.js/dist/Chart.bundle.min.js ./pi_weather_station/php/chartJs_2.7.2<br>
-
-
+select * from sensorData; <br>
 
 
 # Start service to run sampling script on boot
