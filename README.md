@@ -65,21 +65,23 @@ sudo apt-get install mariadb-server <br>
 sudo apt-get install python3-mysqldb <br>
 sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli <br>
 
-then change working directory for apache2 (/var/www/html to html folder of repo) in 2 locations... <br>
+then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations... <br>
 sudo nano /etc/apache2/sites-available/000-default.conf <br>
 sudo nano /etc/apache2/apache2.conf <br>
  
 
 # Open MySQL
-sudo mysql -p <br>
-CREATE DATABASE weather_records; <br>
-USE weather_records; <br>
+sudo mariadb <br>
+CREATE DATABASE weatherLog; <br>
+USE weatherLog; <br>
 
-CREATE TABLE sensor_data(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegrees SMALLINT, pressure SMALLINT, humidity TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
+CREATE TABLE sensorData(ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, de
+cidegreesInternal SMALLINT, pressureInternal SMALLINT, humidityInternal TINYINT UNSIGNED, decidegreesExternal SMALLINT,
+humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
 
-create index by_GMT on sensor_data (GMT);<br>
+create index by_GMT on sensorData (GMT);<br>
 
-CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesLow SMALLINT, decidegreesHigh SMALLINT, pressureLow SMALLINT UNSIGNED, pressureHigh SMALLINT UNSIGNED, humidityLow TINYINT UNSIGNED, humidityHigh TINYINT UNSIGNED, PRIMARY KEY (ID));
+CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesInternalLow SMALLINT, decidegreesInternalHigh SMALLINT, pressureInternalLow SMALLINT UNSIGNED, pressureInternalHigh SMALLINT UNSIGNED, humidityInternalLow TINYINT UNSIGNED, humidityInternalHigh TINYINT UNSIGNED, decidegreesExternalLow SMALLINT, decidegreesExternalHigh SMALLINT, humidityExternalLow TINYINT UNSIGNED, humidityExternalHigh TINYINT UNSIGNED, voltageTempSensor SMALLINT, PRIMARY KEY(ID));
 
 create index by_date on dailyExtremes (sampledDate);
 
