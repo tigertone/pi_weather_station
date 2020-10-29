@@ -85,7 +85,13 @@ CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sample
 
 create index by_date on dailyExtremes (sampledDate);
 
-quit <br>
+CREATE USER 'database_writer'@'localhost';<br>	
+GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'; <br>	
+CREATE USER 'database_reader'@'localhost'; <br>	
+GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost'; <br>	
+FLUSH PRIVILEGES; <br>
+
+quit; <br>
 
 
 
@@ -94,37 +100,20 @@ sudo mysql_secure_installation
 
 
 
-# Start service to run sampling script on boot
-
-sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
-sudo systemctl start weatherStation.service
 
 
 
 
+# ToDo
+Install nrf code
+Need to remove code from getStatus referencing the temporary file voltage.txt
+Check if still used elsewhere
+Don't initially display status page under current data
+Show error when there is no data, rather than NaNs/undefined's
 
-
-# If reverting to holding some variables in RAM (e.g. current voltage) rather than writing to DB
-Goal is to have a 16KB directory in RAM for temporarily storage.
-First create the tmp dir:
-
- sudo mkdir /var/weatherTmp
-
-then edit the fstab file by
-
- sudo nano /etc/fstab
-
-and add the line
-
- tmpfs /home/pi/pi_weather_station/weatherTmp tmpfs nodev,nosuid,size=16K 0 0 
-
-save and close the file. Now issue
-
- sudo mount -a
-
-To check if your operation succeeded issue
- df
-
+Start service to run sampling script on boot
+-  sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
+-  sudo systemctl start weatherStation.service
 
 
 # Git
