@@ -87,8 +87,11 @@ create index by_date on dailyExtremes (sampledDate);
 
 quit <br>
 
-# To view table
-select * from sensorData; <br>
+
+
+# Secure database. Accept all suggestions.
+sudo mysql_secure_installation
+
 
 
 # Start service to run sampling script on boot
