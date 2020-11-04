@@ -100,14 +100,21 @@ quit; <br>
 # Secure database. Accept all suggestions.
 sudo mysql_secure_installation
 
+# Install RF24 code
+If updating etc get new version of code
+e.g. wget https://github.com/nRF24/RF24/archive/v1.3.9.zip
+unzip v1.3.9.zip
+rm v1.3.9.zip
 
+...otherwise can just use folder included here.
 
-
-
+cd RF24-1.3.9/
+./configure
+make
+sudo make install
 
 
 # ToDo
-Install nrf code
 Need to remove code from getStatus referencing the temporary file voltage.txt
 Check if still used elsewhere
 Don't initially display status page under current data
