@@ -22,7 +22,8 @@ Disable bluetooth: dtoverlay=disable-bt
 Disable on board LED: dtparam=act_led_trigger=none
                       dtparam=act_led_active=on
 Set gpu memory to 16mb as running headless: gpu_mem=16
-Make sure SPI is enabled for nrf chip: dtparam=spi=on
+Enable SPI for nrf chip: dtparam=spi=on
+Enable I2C for bme280 chip: dtparam=i2c_arm=on
 
 
 # Create systemd file to disable HDMI port on boot
