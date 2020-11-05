@@ -114,6 +114,10 @@ cd RF24-1.3.9/
 make
 sudo make install
 
+# bme280
+cd pi_weather_station/bme280-python/
+sudo ./install.sh
+
 
 # ToDo
 Need to remove code from getStatus referencing the temporary file voltage.txt
