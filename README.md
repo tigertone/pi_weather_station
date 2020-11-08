@@ -78,8 +78,7 @@ sudo mariadb <br>
 CREATE DATABASE weatherLog; <br>
 USE weatherLog; <br>
 
-CREATE TABLE sensorData(ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, de
-cidegreesInternal SMALLINT, pressureInternal SMALLINT, humidityInternal TINYINT UNSIGNED, decidegreesExternal SMALLINT,
+CREATE TABLE sensorData(ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegreesInternal SMALLINT, pressureInternal SMALLINT, humidityInternal TINYINT UNSIGNED, decidegreesExternal SMALLINT,
 humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
 
 create index by_GMT on sensorData (GMT);<br>
@@ -90,8 +89,9 @@ create index by_date on dailyExtremes (sampledDate);
 
 CREATE USER 'database_writer'@'localhost';<br>	
 GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'; <br>	
-CREATE USER 'database_reader'@'localhost'; <br>	
-GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost'; <br>	
+CREATE USER 'database_reader'@'localhost'; <br>		
+GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost'; <br>
+GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost'; <br>
 FLUSH PRIVILEGES; <br>
 
 quit; <br>
@@ -135,7 +135,7 @@ Show error when there is no data, rather than NaNs/undefined's
 
 Start service to run sampling script on boot
 -  sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
--  sudo systemctl start weatherStation.service
+-  sudo systemctl enable weatherStation.service
 
 
 # Git
