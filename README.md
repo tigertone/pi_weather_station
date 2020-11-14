@@ -1,10 +1,10 @@
-# Setup for pi zero W
+## Setup for pi zero W
 
-# Enable ssh
-    If running headless, add empty file named "ssh" to boot directory (no file extension)
+### Enable ssh
+If running headless, add empty file named "ssh" to boot directory (no file extension)  
     
-# Add wifi details
-    If running headless, create file named "wpa_supplicant.conf" in the boot directory. It must contain the following...
+### Add wifi details
+If running headless, create file named "wpa_supplicant.conf" in the boot directory. It must contain the following...
     
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
@@ -15,7 +15,7 @@ network={
  psk="<Password for your wireless LAN>"
 }
 
-# Modify /boot/config.txt
+### Modify /boot/config.txt
 
 Disable sound: dtparam=audio=off
 Disable bluetooth: dtoverlay=disable-bt
@@ -27,7 +27,7 @@ Enable I2C for bme280 chip: dtparam=i2c_arm=on
 
 
 # Create systemd file to disable HDMI port on boot
-sudo nano /etc/systemd/system/disableHDMI.service
+`sudo nano/etc/systemd/system/disableHDMI.service`
 
 Add...
 
