@@ -77,13 +77,13 @@ function selectTab(evt, tabName)
 				{
 					
 					currentDate = new Date();
-					xAxesEnd = currentDate.toUTCString();
-					xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1)).toUTCString();
+					xAxesEnd = currentDate.getTime();
+					xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1));
 					
 					timeUnit = 'hour';
 					
-					xData = returnedData.GMT.map(item=>{return new Date(item)});
-			
+					xData = returnedData.GMT_timestamp;
+
 					toPlot1 = ['decidegreesExternal', 'pressureNull',     'humidityExternal'];
 					toPlot2 = ['decidegreesInternal', 'pressureInternal', 'humidityInternal'];
 					legendStr = ['Temp (°C)',         'Pressure (mbar)',  'Humidity (%)'];
@@ -96,12 +96,12 @@ function selectTab(evt, tabName)
 				{
 				
 					currentDate = new Date();
-					xAxesEnd = currentDate.toUTCString();
-					xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).toUTCString();
+					xAxesEnd = currentDate.getTime();
+					xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).getTime();
 					
 					timeUnit = 'month';
 
-					xData = returnedData.sampledDate.map(item=>{return new Date(item)});
+					xData = returnedData.sampledDate.map(item=>{return new Date(item).getTime()});
 										
 					toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternal1'];
 					toPlot2 = ['decidegreesExternalLow',  'decidegreesInternalLow',  'humidityExternalLow',  'humidityInternalLow',  'pressureInternalLow',  ''];
@@ -176,7 +176,8 @@ function selectTab(evt, tabName)
 						//for (j=0; j<xData.length; j++){
 							//dataParsed[j] = {x:xData[j],y:returnedData[toPlot1[i]][j]}
 						//}
-						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, timeUnit, 0, 4, legendStr[i], data1Colour, data2Colour));
+
+						// new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, timeUnit, 0, 4, legendStr[i], data1Colour, data2Colour));
 
 					}             	
 				}
@@ -221,7 +222,8 @@ function createConfig(xData, yData1, yData2, xmin, xmax, timeUnit, ymin, ymax, y
 			scales:
 			{
 				x:
-				{				
+				{max:xmax,
+min:xmin,				
 				type: 'time',
                 time: 
 					{
@@ -230,8 +232,6 @@ function createConfig(xData, yData1, yData2, xmin, xmax, timeUnit, ymin, ymax, y
 						{
 							month: 'MMM',
 						},
-					max: xmax,
-					min: xmin,
 					},
 				},
 				y:

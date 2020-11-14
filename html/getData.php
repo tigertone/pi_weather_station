@@ -7,7 +7,7 @@ header("Content-Type: application/json; charset=UTF-8");
 $dataRange=$_GET["dataRange"];
 
 // Create connection
-$conn=mysqli_connect("localhost", "database_reader", "PASSWORD", "weather_records");
+$conn=mysqli_connect("localhost", "database_reader","","weatherLog");
 
 
 
@@ -17,24 +17,24 @@ die( "Connection failed: " . mysqli_connect_error());
 }
 
 //$queryFieldsInternal = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal");
-$queryFieldsInternal = array("DATE_FORMAT(GMT,'%Y-%m-%dT%TZ') AS GMT", "decidegreesInternal", "pressureInternal", "humidityInternal");
+$queryFieldsInternal = array("ROUND(UNIX_TIMESTAMP(GMT)*1000) AS GMT_timestamp", "decidegreesInternal", "pressureInternal", "humidityInternal");
 $queryFieldsExternal = array("decidegreesExternal", "humidityExternal");
-$queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternal1");
+$queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageTempSensor");
 
 // Get most recent data
 if ($dataRange === "Current")
 {
 	$queryFieldsAll = array_merge($queryFieldsInternal,$queryFieldsExternal, $queryFieldsExtremes, array("pressureInternalTrend"));
-	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensor_data WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesInternal IS NOT NULL) order by ID desc limit 1");
-	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExternal)." FROM sensor_data WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesExternal IS NOT NULL) order by ID desc limit 1";
+	$sqlQueries = array("SELECT ".implode(',',$queryFieldsInternal)." FROM sensorData WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesInternal IS NOT NULL) order by ID desc limit 1");
+	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExternal)." FROM sensorData WHERE (GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE) AND decidegreesExternal IS NOT NULL) order by ID desc limit 1";
 	$sqlQueries[] ="SELECT ".implode(',',$queryFieldsExtremes)."  FROM dailyExtremes WHERE sampledDate = UTC_DATE()";
-	$sqlQueries[] ="SELECT IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)>AVG(pressureInternal)+1,'Rising',IF((SELECT pressureInternal FROM sensor_data order by ID desc limit 1)<AVG(pressureInternal)-1,'Falling','Settled')) as pressureInternalTrend FROM sensor_data WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 6 HOUR)";
+	$sqlQueries[] ="SELECT IF((SELECT pressureInternal FROM sensorData order by ID desc limit 1)>AVG(pressureInternal)+1,'Rising',IF((SELECT pressureInternal FROM sensorData order by ID desc limit 1)<AVG(pressureInternal)-1,'Falling','Settled')) as pressureInternalTrend FROM sensorData WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 6 HOUR)";
 }
 
 elseif ($dataRange === "Today")
 {
 	$queryFieldsAll = array_merge($queryFieldsInternal,$queryFieldsExternal);
-	$sqlQueries=array("SELECT ".implode(',',$queryFieldsAll)." FROM sensor_data WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 DAY)");
+	$sqlQueries=array("SELECT ".implode(',',$queryFieldsAll)." FROM sensorData WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 DAY)");
 }
 
 elseif ($dataRange === "Annual")
@@ -46,13 +46,12 @@ elseif ($dataRange === "Annual")
 $myArray= array();
 
 
-$queryFieldsAll = str_replace("DATE_FORMAT(GMT,'%Y-%m-%dT%TZ') AS GMT","GMT",$queryFieldsAll);
+$queryFieldsAll = str_replace("ROUND(UNIX_TIMESTAMP(GMT)*1000) AS GMT_timestamp","GMT_timestamp",$queryFieldsAll);
 
 
 foreach ($sqlQueries as $query)
 {
 	$result=mysqli_query($conn, $query);
-
 
 	if (mysqli_num_rows($result)!=0)
 	{
@@ -71,7 +70,6 @@ foreach ($sqlQueries as $query)
 
 foreach ($queryFieldsAll as $fieldName)
 		{
-			
 			if (!empty(array_column($myArray,$fieldName)))
 			{
 				$myArray[$fieldName] = NULL;

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 -u acquireSensorData.py
-WorkingDirectory=/home/pi/pi_weather_station/python_code/bme280
+WorkingDirectory=/home/pi/pi_weather_station/python_code/
 StandardOutput=inherit
 StandardError=inherit
 Restart=always

@@ -1,7 +1,7 @@
+
 # chmod +x read_serial_data.py
 
 from __future__ import print_function
-from Adafruit_BME280 import *
 import MySQLdb
 import time
 import math
@@ -9,30 +9,33 @@ from datetime import date, datetime, timedelta
 from RF24 import *
 import RPi.GPIO as GPIO
 from struct import *
+from smbus import SMBus
+from bme280 import BME280
 
 # Print information to command line as the program executes
 verbose = True
 
-# Configure Internal sensor
+# Configure Internal sensor (BME280)
 try:
-	sensorInternal = BME280(t_mode=BME280_OSAMPLE_1, p_mode=BME280_OSAMPLE_1, h_mode=BME280_OSAMPLE_1)
+	bus = SMBus(1)
+	sensorInternal = BME280(i2c_dev=bus, i2c_addr=0x77)
+	sensorInternal.setup(mode="forced")
 except Exception as e:
 	print('Internal sensor malfuntion')
 	sensorInternal = False
-	
 
-# Setup for GPIO 22 CE and CE0 CSN with SPI Speed @ 8Mhz
-radio = RF24(RPI_V2_GPIO_P1_15, BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ)
+# Setup for GPIO 
+radio = RF24(22, 0)
 
 
 ##########################################
 pipes = [0xF0F0F0F0E1, 0xF0F0F0F0D2]
 
 # Set parameters for nrf radio 
-sensorExternal = radio.begin()
+sensorExternal = radio.begin();
 radio.enableDynamicPayloads();
-radio.setPALevel(RF24_PA_MAX);
-radio.setDataRate(RF24_250KBPS)
+radio.setPALevel(RF24_PA_MAX,1);
+radio.setDataRate(RF24_250KBPS);
 radio.setCRCLength(RF24_CRC_8);
 radio.setChannel(80);
 radio.setAutoAck(True);
@@ -51,7 +54,7 @@ sensorVariableNames = ["decidegreesInternal","pressureInternal","humidityInterna
 
 # Infinite loop
 while True:
-	
+
 	if verbose:
 		print("\nNewLoop...")
 
@@ -72,10 +75,13 @@ while True:
 	if sensorInternal:
 		if verbose:
 			print("\nReading internal sensor")
-		decidegreesInternal = int(sensorInternal.read_temperature()*10)
-		pressureInternal = int(sensorInternal.read_pressure()/100)
-		humidityInternal = int(sensorInternal.read_humidity())
-		
+		decidegreesInternal = int(sensorInternal.get_temperature()*10)
+		pressureInternal = int(sensorInternal.get_pressure())
+		humidityInternal = int(sensorInternal.get_humidity())
+		if verbose:
+			print(decidegreesInternal)
+			print(pressureInternal)
+			print(humidityInternal)
 	# If there is any new external data read it all
 	if sensorExternal and radio.available():
 		if verbose:
@@ -105,7 +111,7 @@ while True:
 
 	# Connect to MySQL
 	try:
-		db = MySQLdb.connect(host="localhost", user="database_writer",passwd="PASSWORD", db="weather_records")
+		db = MySQLdb.connect(host="localhost", user="root",passwd="", db="weatherLog")
 		cur = db.cursor()
 		if verbose:
 			print("\nConnected to database")
@@ -117,16 +123,16 @@ while True:
 	# If there has been a gap since the last data point, insert a row with null values in both tables so that chartjs won't join the gaps
 	try:
 
-		query = """SELECT GMT FROM sensor_data order by id desc limit 1;"""
+		query = """SELECT GMT FROM sensorData order by id desc limit 1;"""
 		cur.execute(query)
 
 		if cur.rowcount>0:
 			results = cur.fetchone()
 			if (local_datetime - results[0]).seconds > 120:
 				newDatetime = local_datetime - timedelta(minutes=1)
-				query = "INSERT INTO sensor_data (GMT) VALUES('{0}')".format(newDatetime.strftime("%Y-%m-%d %H:%M:%S"))
+				query = "INSERT INTO sensorData (GMT) VALUES('{0}')".format(newDatetime.strftime("%Y-%m-%d %H:%M:%S"))
 				if verbose:
-					print("\nInserting dummy row into sensor_data...")
+					print("\nInserting dummy row into sensorData...")
 					print(query)
 				cur.execute(query)
 				db.commit()
@@ -153,22 +159,22 @@ while True:
 
 	# Add a new row into the database with the current data
 	try:
-		query = """INSERT INTO sensor_data (GMT,decidegreesInternal,pressureInternal,humidityInternal, decidegreesExternal, humidityExternal) VALUES(%s,%s,%s,%s,%s,%s)""", (local_datetime_str,decidegreesInternal,pressureInternal,humidityInternal, decidegreesExternal, humidityExternal)
+		query = """INSERT INTO sensorData (GMT,decidegreesInternal,pressureInternal,humidityInternal, decidegreesExternal, humidityExternal) VALUES(%s,%s,%s,%s,%s,%s)""", (local_datetime_str,decidegreesInternal,pressureInternal,humidityInternal, decidegreesExternal, humidityExternal)
 		if verbose:
-			print("\nInserting current data into sensor_data...")
+			print("\nInserting current data into sensorData...")
 			print(*query)
 		cur.execute(*query)
 		db.commit()
 		
 	except Exception as e:
-		print("Failed to insert new row into sensor_data!")
+		print("Failed to insert new row into sensorData!")
 		print(e)
 		db.rollback()
 
 		
 	# Test if current values are new extremes. If so update db
 	# Get current extreme values
-	query = "SELECT ID, sampledDate, decidegreesInternalHigh, decidegreesInternalLow, humidityInternalHigh, humidityInternalLow, pressureInternalHigh, pressureInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh, humidityExternalLow, voltageExternal1 FROM dailyExtremes WHERE sampledDate = '{0}'".format(local_date)
+	query = "SELECT ID, sampledDate, decidegreesInternalHigh, decidegreesInternalLow, humidityInternalHigh, humidityInternalLow, pressureInternalHigh, pressureInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh, humidityExternalLow, voltageTempSensor FROM dailyExtremes WHERE sampledDate = '{0}'".format(local_date)
 	if verbose:
 		print("\nExtracting current data from dailyExtremes...")
 		print(query)
@@ -215,7 +221,7 @@ while True:
 				
 		# Otherwise must be a new day, so insert all the current values
 		else:
-			query = """INSERT INTO dailyExtremes (sampledDate,decidegreesInternalHigh,decidegreesInternalLow,pressureInternalHigh,pressureInternalLow,humidityInternalHigh,humidityInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh,humidityExternalLow,voltageExternal1) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(local_date,decidegreesInternal,decidegreesInternal,pressureInternal,pressureInternal,humidityInternal,humidityInternal, decidegreesExternal, decidegreesExternal, humidityExternal, humidityExternal, voltageExternal1)
+			query = """INSERT INTO dailyExtremes (sampledDate,decidegreesInternalHigh,decidegreesInternalLow,pressureInternalHigh,pressureInternalLow,humidityInternalHigh,humidityInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh,humidityExternalLow,voltageTempSensor) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(local_date,decidegreesInternal,decidegreesInternal,pressureInternal,pressureInternal,humidityInternal,humidityInternal, decidegreesExternal, decidegreesExternal, humidityExternal, humidityExternal, voltageExternal1)
 			if verbose:
 				print("\nNew day - inserting new extremes...")
 				print(query)
