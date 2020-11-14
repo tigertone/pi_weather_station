@@ -15,24 +15,26 @@ network={
  psk="<Password for your wireless LAN>"
 }
 
-### Modify /boot/config.txt
+### Modify boot confit
 
-Disable sound: dtparam=audio=off
-Disable bluetooth: dtoverlay=disable-bt
-Disable on board LED: dtparam=act_led_trigger=none
-                      dtparam=act_led_active=on
-Set gpu memory to 16mb as running headless: gpu_mem=16
-Enable SPI for nrf chip: dtparam=spi=on
-Enable I2C for bme280 chip: dtparam=i2c_arm=on
+`sudo nano /boot/config.txt`  
+
+Disable sound: dtparam=audio=off  
+Disable bluetooth: dtoverlay=disable-bt  
+Disable on board LED: dtparam=act_led_trigger=none  
+                      dtparam=act_led_active=on  
+Set gpu memory to 16mb as running headless: gpu_mem=16  
+Enable SPI for nrf chip: dtparam=spi=on  
+Enable I2C for bme280 chip: dtparam=i2c_arm=on  
 
 
-# Create systemd file to disable HDMI port on boot
+### Create systemd file to disable HDMI port on boot  
 `sudo nano/etc/systemd/system/disableHDMI.service`
 
 Add...
 
 
-*******************************************************
+****************************************************
 
 [Unit]
 Description=Disable Raspberry Pi HDMI port
@@ -63,7 +65,7 @@ tvservice -s    (after reboot)
 
 
 
-# Setup webserver
+### Setup webserver
 sudo apt-get install mariadb-server <br>
 sudo apt-get install python3-mysqldb <br>
 sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli <br>
@@ -73,35 +75,35 @@ sudo nano /etc/apache2/sites-available/000-default.conf <br>
 sudo nano /etc/apache2/apache2.conf <br>
  
 
-# Open MySQL
-sudo mariadb <br>
-CREATE DATABASE weatherLog; <br>
-USE weatherLog; <br>
+### Create detabases
+sudo mariadb  
+CREATE DATABASE weatherLog;  
+USE weatherLog;  
 
 CREATE TABLE sensorData(ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegreesInternal SMALLINT, pressureInternal SMALLINT, humidityInternal TINYINT UNSIGNED, decidegreesExternal SMALLINT,
-humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID)); <br>
+humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID));  
 
-create index by_GMT on sensorData (GMT);<br>
+create index by_GMT on sensorData (GMT);  
 
 CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesInternalLow SMALLINT, decidegreesInternalHigh SMALLINT, pressureInternalLow SMALLINT UNSIGNED, pressureInternalHigh SMALLINT UNSIGNED, humidityInternalLow TINYINT UNSIGNED, humidityInternalHigh TINYINT UNSIGNED, decidegreesExternalLow SMALLINT, decidegreesExternalHigh SMALLINT, humidityExternalLow TINYINT UNSIGNED, humidityExternalHigh TINYINT UNSIGNED, voltageTempSensor SMALLINT, PRIMARY KEY(ID));
 
 create index by_date on dailyExtremes (sampledDate);
 
-CREATE USER 'database_writer'@'localhost';<br>	
-GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost'; <br>	
-CREATE USER 'database_reader'@'localhost'; <br>		
-GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost'; <br>
-GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost'; <br>
-FLUSH PRIVILEGES; <br>
+CREATE USER 'database_writer'@'localhost';  	
+GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost';  	
+CREATE USER 'database_reader'@'localhost';  	
+GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost';  
+GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost';  
+FLUSH PRIVILEGES;  
 
-quit; <br>
+quit;  
 
 
 
-# Secure database. Accept all suggestions.
+### Secure database. Accept all suggestions.
 sudo mysql_secure_installation
 
-# Install RF24 code
+### Install RF24 code
 If updating etc get new version of code
 e.g. wget https://github.com/nRF24/RF24/archive/v1.3.9.zip
 unzip v1.3.9.zip
@@ -121,13 +123,13 @@ python3 setup.py build
 sudo python3 setup.py install
 
 
-# bme280
+### Install bme280 library
 `sudo apt install python3-pip`  
 `sudo pip3 install pimoroni-bme280 smbus`  
 
 
 
-# ToDo
+### ToDo
 Need to remove code from getStatus referencing the temporary file voltage.txt
 Check if still used elsewhere
 Don't initially display status page under current data
