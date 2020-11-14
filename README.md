@@ -122,8 +122,8 @@ sudo python3 setup.py install
 
 
 # bme280
-sudo apt install python3-pip
-sudo pip3 install pimoroni-bme280 smbus
+`sudo apt install python3-pip`  
+`sudo pip3 install pimoroni-bme280 smbus`  
 
 
 
@@ -132,13 +132,17 @@ Need to remove code from getStatus referencing the temporary file voltage.txt
 Check if still used elsewhere
 Don't initially display status page under current data
 Show error when there is no data, rather than NaNs/undefined's
+Status of internal sensor
+Align y axis on plots
+Annual data to timestamps
 
-Start service to run sampling script on boot
--  sudo cp weatherStation.service /etc/systemd/system/weatherStation.service
--  sudo systemctl enable weatherStation.service
+
+### Start service to run sampling script on boot
+`sudo cp weatherStation.service /etc/systemd/system/weatherStation.service`  
+`sudo systemctl enable weatherStation.service`  
 
 
-# Git
-Git add .
-Git commit -m "Commit description "
-Git add -u      # for deleted files 
+### Git
+`Git add .` (Add all files/folders)  
+`Git commit -m "Commit description "`  
+`Git add -u`  (Unmount deleted files)  
