@@ -32,9 +32,7 @@ RF24 radio(9, 10);
 
 
 
-// Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
-
+byte addresses[][6] = {"0xF0F0F0F0E1"};
 
 struct dataStruct {
   int temp;
@@ -48,15 +46,13 @@ void setup(void)
   tempValid = sht31.begin(0x44);
 
   // enable dynamic payloads
-  radio.enableDynamicPayloads();
-  radio.setCRCLength(RF24_CRC_8);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
   radio.setRetries(2, 4);
-  radio.setAutoAck(true);
   radio.setChannel(80);
+  radio.setPayloadSize(3);
 
-  radio.openWritingPipe(pipes[0]);
+  radio.openWritingPipe(addresses[0]);
 
 }
 
@@ -85,9 +81,10 @@ void loop(void)
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
-  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
+  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  LowPower.powerDown(SLEEP_2S, ADC_OFF, BOD_OFF);  
+  LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);  
 
 }
-
 
 
