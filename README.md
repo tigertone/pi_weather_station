@@ -28,121 +28,91 @@ Enable SPI for nrf chip: dtparam=spi=on
 Enable I2C for bme280 chip: dtparam=i2c_arm=on  
 
 
-### Create systemd file to disable HDMI port on boot  
-`sudo nano/etc/systemd/system/disableHDMI.service`
-
-Add...
-
-
-****************************************************
-
-[Unit]
-Description=Disable Raspberry Pi HDMI port
-
-[Service]
-Type=oneshot
-ExecStart=/opt/vc/bin/tvservice -o
-ExecStop=/opt/vc/bin/tvservice -p
-RemainAfterExit=yes
-
-[Install]
-WantedBy=default.target
-
-*******************************************************
-
-Enable...
-
-sudo systemctl enable /etc/systemd/system/disableHDMI.service
+### Setup service to disable HDMI port on boot 
+`sudo cp disableHDMI.service /etc/systemd/system/disableHDMI.service`
+`sudo systemctl enable weatherStation.service`  
 
 Can be tested with...
 
-tvservice -s    (after reboot)
-
-
-
-
- 
-
+`tvservice -s`    (after reboot)
 
 
 ### Setup webserver
-sudo apt-get install mariadb-server <br>
-sudo apt-get install python3-mysqldb <br>
-sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli <br>
+`sudo apt-get install mariadb-server`  
+`sudo apt-get install python3-mysqldb`  
+`sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli`  
 
-then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations... <br>
-sudo nano /etc/apache2/sites-available/000-default.conf <br>
-sudo nano /etc/apache2/apache2.conf <br>
+then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...
+`sudo nano /etc/apache2/sites-available/000-default.conf`
+`sudo nano /etc/apache2/apache2.conf`  
  
 
-### Create detabases
-sudo mariadb  
-CREATE DATABASE weatherLog;  
-USE weatherLog;  
+### Create databases
+`sudo mariadb`  
+`CREATE DATABASE weatherLog;`  
+`USE weatherLog;`
 
-CREATE TABLE sensorData(ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegreesInternal SMALLINT, pressureInternal SMALLINT, humidityInternal TINYINT UNSIGNED, decidegreesExternal SMALLINT,
-humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID));  
+`CREATE TABLE sensorData(ID BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, GMT DATETIME NOT NULL, decidegreesInternal SMALLINT, pressureInternal SMALLINT, humidityInternal TINYINT UNSIGNED, decidegreesExternal SMALLINT,
+humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID));`
 
-create index by_GMT on sensorData (GMT);  
+`create index by_GMT on sensorData (GMT);`
 
-CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesInternalLow SMALLINT, decidegreesInternalHigh SMALLINT, pressureInternalLow SMALLINT UNSIGNED, pressureInternalHigh SMALLINT UNSIGNED, humidityInternalLow TINYINT UNSIGNED, humidityInternalHigh TINYINT UNSIGNED, decidegreesExternalLow SMALLINT, decidegreesExternalHigh SMALLINT, humidityExternalLow TINYINT UNSIGNED, humidityExternalHigh TINYINT UNSIGNED, voltageTempSensor SMALLINT, PRIMARY KEY(ID));
+`CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesInternalLow SMALLINT, decidegreesInternalHigh SMALLINT, pressureInternalLow SMALLINT UNSIGNED, pressureInternalHigh SMALLINT UNSIGNED, humidityInternalLow TINYINT UNSIGNED, humidityInternalHigh TINYINT UNSIGNED, decidegreesExternalLow SMALLINT, decidegreesExternalHigh SMALLINT, humidityExternalLow TINYINT UNSIGNED, humidityExternalHigh TINYINT UNSIGNED, voltageTempSensor SMALLINT, PRIMARY KEY(ID));`
 
-create index by_date on dailyExtremes (sampledDate);
+`create index by_date on dailyExtremes (sampledDate);`
 
-CREATE USER 'database_writer'@'localhost';  	
-GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost';  	
-CREATE USER 'database_reader'@'localhost';  	
-GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost';  
-GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost';  
-FLUSH PRIVILEGES;  
+`CREATE USER 'database_writer'@'localhost';`  	
+`GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost';`  	
+`CREATE USER 'database_reader'@'localhost';`  	
+`GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost';`  
+`GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost';`  
+`FLUSH PRIVILEGES;`
 
-quit;  
+`quit;`
 
 
 
 ### Secure database. Accept all suggestions.
-sudo mysql_secure_installation
+`sudo mysql_secure_installation`
 
 ### Install RF24 code
 If updating etc get new version of code
-e.g. wget https://github.com/nRF24/RF24/archive/v1.3.9.zip
-unzip v1.3.9.zip
-rm v1.3.9.zip
+`e.g. wget https://github.com/nRF24/RF24/archive/v1.3.9.zip`
+`unzip v1.3.9.zip`
+`rm v1.3.9.zip`
 
 ...otherwise can just use folder included here.
 
-cd RF24-1.3.9/
-./configure
-make
-sudo make install
+`cd RF24-1.3.9/`
+`./configure`
+`make`
+`sudo make install`
 
-sudo apt-get install python3-dev libboost-python-dev python3-setuptools python3-rpi.gpio 
-sudo ln -s $(ls /usr/lib/arm-linux-gnueabihf/libboost_python3-py3*.so | tail -1) /usr/lib/arm-linux-gnueabihf/libboost_python3.so 
-cd RF24-1.3.9/pyRF24/
-python3 setup.py build
-sudo python3 setup.py install
+`sudo apt-get install python3-dev libboost-python-dev python3-setuptools python3-rpi.gpio`
+`sudo ln -s $(ls /usr/lib/arm-linux-gnueabihf/libboost_python3-py3*.so | tail -1) /usr/lib/arm-linux-gnueabihf/libboost_python3.so`
+`cd RF24-1.3.9/pyRF24/`
+`python3 setup.py build`
+`sudo python3 setup.py install`
 
 
 ### Install bme280 library
-`sudo apt install python3-pip`  
+`sudo apt install python3-pip`
 `sudo pip3 install pimoroni-bme280 smbus`  
+
+
+### Start service to run sampling script on boot
+`sudo cp weatherStation.service /etc/systemd/system/weatherStation.service`
+`sudo systemctl enable weatherStation.service`  
+
 
 
 
 ### ToDo
-Need to remove code from getStatus referencing the temporary file voltage.txt
-Check if still used elsewhere
 Don't initially display status page under current data
 Show error when there is no data, rather than NaNs/undefined's
 Status of internal sensor
 Align y axis on plots
 Annual data to timestamps
-
-
-### Start service to run sampling script on boot
-`sudo cp weatherStation.service /etc/systemd/system/weatherStation.service`  
-`sudo systemctl enable weatherStation.service`  
-
 
 ### Git
 `Git add .` (Add all files/folders)  
