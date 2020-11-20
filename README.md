@@ -29,7 +29,7 @@ Enable I2C for bme280 chip: dtparam=i2c_arm=on
 
 
 ### Setup service to disable HDMI port on boot 
-`sudo cp disableHDMI.service /etc/systemd/system/disableHDMI.service`
+`sudo cp disableHDMI.service /etc/systemd/system/disableHDMI.service`  
 `sudo systemctl enable weatherStation.service`  
 
 Can be tested with...
@@ -43,7 +43,7 @@ Can be tested with...
 `sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli`  
 
 then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...
-`sudo nano /etc/apache2/sites-available/000-default.conf`
+`sudo nano /etc/apache2/sites-available/000-default.conf`  
 `sudo nano /etc/apache2/apache2.conf`  
  
 
@@ -77,31 +77,31 @@ humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID));`
 
 ### Install RF24 code
 If updating etc get new version of code
-`e.g. wget https://github.com/nRF24/RF24/archive/v1.3.9.zip`
-`unzip v1.3.9.zip`
-`rm v1.3.9.zip`
+`e.g. wget https://github.com/nRF24/RF24/archive/v1.3.9.zip`  
+`unzip v1.3.9.zip`  
+`rm v1.3.9.zip` 
 
 ...otherwise can just use folder included here.
 
-`cd RF24-1.3.9/`
-`./configure`
-`make`
-`sudo make install`
+`cd RF24-1.3.9/`  
+`./configure`  
+`make`   
+`sudo make install`  
 
-`sudo apt-get install python3-dev libboost-python-dev python3-setuptools python3-rpi.gpio`
-`sudo ln -s $(ls /usr/lib/arm-linux-gnueabihf/libboost_python3-py3*.so | tail -1) /usr/lib/arm-linux-gnueabihf/libboost_python3.so`
-`cd RF24-1.3.9/pyRF24/`
-`python3 setup.py build`
-`sudo python3 setup.py install`
+`sudo apt-get install python3-dev libboost-python-dev python3-setuptools python3-rpi.gpio`  
+`sudo ln -s $(ls /usr/lib/arm-linux-gnueabihf/libboost_python3-py3*.so | tail -1) /usr/lib/arm-linux-gnueabihf/libboost_python3.so`  
+`cd RF24-1.3.9/pyRF24/`  
+`python3 setup.py build`  
+`sudo python3 setup.py install`  
 
 
 ### Install bme280 library
-`sudo apt install python3-pip`
+`sudo apt install python3-pip`  
 `sudo pip3 install pimoroni-bme280 smbus`  
 
 
 ### Start service to run sampling script on boot
-`sudo cp weatherStation.service /etc/systemd/system/weatherStation.service`
+`sudo cp weatherStation.service /etc/systemd/system/weatherStation.service`  
 `sudo systemctl enable weatherStation.service`  
 
 
