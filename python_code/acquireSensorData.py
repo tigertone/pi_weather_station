@@ -29,16 +29,14 @@ radio = RF24(22, 0)
 
 
 ##########################################
-pipes = [0xF0F0F0F0E1, 0xF0F0F0F0D2]
+pipes = [0xF0F0F0F0E1];
 
-# Set parameters for nrf radio 
+# Set parameters for nrf radio
 sensorExternal = radio.begin();
-radio.enableDynamicPayloads();
 radio.setPALevel(RF24_PA_MAX,1);
 radio.setDataRate(RF24_250KBPS);
-radio.setCRCLength(RF24_CRC_8);
 radio.setChannel(80);
-radio.setAutoAck(True);
+radio.payloadSize = 3;
 if verbose:
 	radio.printDetails()
 
