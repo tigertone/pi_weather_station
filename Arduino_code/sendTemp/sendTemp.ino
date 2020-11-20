@@ -1,15 +1,5 @@
 /*
-  Copyright (C) 2011 J. Coliz <maniacbug@ymail.com>
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  version 2 as published by the Free Software Foundation.
-*/
-
-/**
-   Example using Dynamic Payloads
-
-   This is an example of how to use payloads of a varying (dynamic) size.
+Take readings using a Sensiron SHT31 sensor and tranmit using nrf24l01+ wireless chip
 */
 
 #include <SPI.h>
@@ -32,7 +22,7 @@ RF24 radio(9, 10);
 
 
 
-byte addresses[][6] = {"0xF0F0F0F0E1"};
+const uint64_t pipes[1] = { 0xF0F0F0F0E1LL };
 
 struct dataStruct {
   int temp;
@@ -52,7 +42,7 @@ void setup(void)
   radio.setChannel(80);
   radio.setPayloadSize(3);
 
-  radio.openWritingPipe(addresses[0]);
+  radio.openWritingPipe(pipes[0]);
 
 }
 
