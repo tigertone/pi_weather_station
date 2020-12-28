@@ -9,6 +9,8 @@ Take readings using a Sensiron SHT31 sensor and tranmit using nrf24l01+ wireless
 #include "LowPower.h"
 #include "Adafruit_SHT31.h"
 
+#define RF24_POWERUP_DELAY 500;
+
 bool tempValid;
 unsigned int counter = 0; 
 
@@ -48,15 +50,7 @@ void setup(void)
 
 void loop(void)
 {
-  if (counter == 720)
-  {
-    payload.batteryLevel = getBandgap();
-    counter = 0;
-  } 
-  else if (counter==720)
-  {
-    counter = counter + 1;
-  }
+  
   
   if (tempValid)
   {
@@ -69,6 +63,17 @@ void loop(void)
     payload.temp = int(100);
     payload.humidity = byte(255);
   }
+
+  if (counter == 0)
+  {
+    payload.batteryLevel = getBandgap();
+    counter = 719;
+  } 
+  else if (counter==720)
+  {
+    counter = counter - 1;
+  }
+  
   radio.powerUp();
   // Send payload. This will block until complete
   radio.write( &payload, sizeof(payload) );
