@@ -94,7 +94,6 @@ If updating etc get new version of code
 `python3 setup.py build`  
 `sudo python3 setup.py install`  
 
-Edit RF24_config.h to shorten RF24_POWERUP_DELAY (tested at 5000ms, but could probably go much shorter) 
 
 ### Install bme280 library
 `sudo apt install python3-pip`  
