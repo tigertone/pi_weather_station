@@ -94,6 +94,7 @@ If updating etc get new version of code
 `python3 setup.py build`  
 `sudo python3 setup.py install`  
 
+Edit RF24_config.h to shorten RF24_POWERUP_DELAY (tested at 5000ms, but could probably go much shorter) 
 
 ### Install bme280 library
 `sudo apt install python3-pip`  
@@ -112,7 +113,10 @@ Don't initially display status page under current data
 Show error when there is no data, rather than NaNs/undefined's
 Status of internal sensor
 Align y axis on plots
-Annual data to timestamps
+Annual data to timestamps  
+Test internal voltage level
+Update to python code to latest RF24 library
+
 
 ### Git
 `Git add .` (Add all files/folders)  
