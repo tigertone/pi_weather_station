@@ -114,7 +114,8 @@ Status of internal sensor
 Align y axis on plots
 Annual data to timestamps  
 Test internal voltage level
-Update to python code to latest RF24 library
+Update to python code to latest RF24 library  
+Test lower powerup delays in arduino code
 
 
 ### Git
