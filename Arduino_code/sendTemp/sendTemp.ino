@@ -2,31 +2,20 @@
   Take readings using a Sensiron SHT31 sensor and tranmit using nrf24l01+ wireless chip
 */
 
-#include <SPI.h>
 #include "RF24.h"
-#include <Arduino.h>
 #include <Wire.h>
 #include "LowPower.h"
 
-#define RF24_POWERUP_DELAY 250;
+#define RF24_POWERUP_DELAY 150;
 
 bool tempSensorActive = false;
 bool tempReadingValid = false;
 unsigned int counter = 0;
-float humidity;
-float temp;
-uint8_t dataArray[3];
 uint8_t readbuffer[6];
-
-
-// Hardware configuration
-const long InternalReferenceVoltage = 1062;
-
-RF24 radio(9, 10);
-
-
-
+int voltageArray[5];
+byte voltageInd[3];
 const uint64_t pipes[1] = { 0xF0F0F0F0E1LL };
+const float adcToVolt = (3.0 / 1023.0f) * 2 * 100; // Multiply by 2 due to voltage divider
 
 struct dataStruct {
   int temp;
@@ -34,17 +23,14 @@ struct dataStruct {
   int batteryLevel;
 } payload;
 
+// Hardware configuration
+RF24 radio(9, 10);
+
+
 void setup(void)
 {
 
   radio.begin();
-
-
-  Wire.begin(0x44);
-  if (readStatus() != 0xFFFF)
-  {
-    tempSensorActive = true;
-  }
 
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_250KBPS);
@@ -53,6 +39,14 @@ void setup(void)
   radio.setPayloadSize(5);
 
   radio.openWritingPipe(pipes[0]);
+
+
+
+  Wire.begin(0x44);
+  if (readStatus() != 0xFFFF)
+  {
+    tempSensorActive = true;
+  }
 
 }
 
@@ -64,10 +58,9 @@ void loop(void)
   {
 
     // add 10% to delay from datasheet
-    writeCommand(0x2400);  delay(17); // High repeatability
-    // writeCommand(0x240B);  delay(7);   // Med repeatability
+    // writeCommand(0x2400);  delay(17); // High repeatability
+    writeCommand(0x240B);  delay(7);   // Med repeatability
     // writeCommand(0x2416);  delay(5);   // Low repeatability
-
 
     size_t recv = Wire.requestFrom(0x44, sizeof(readbuffer));
     if (recv != sizeof(readbuffer))
@@ -84,19 +77,18 @@ void loop(void)
       if (readbuffer[2] != crc8(readbuffer, 2) || readbuffer[5] != crc8(readbuffer + 3, 2))
       {
         tempReadingValid = false;
-      } else {
+      }
+      else
+      {
 
         int32_t stemp = (int32_t)(((uint32_t)readbuffer[0] << 8) | readbuffer[1]);
         stemp = ((4375 * stemp) >> 14) - 4500;
-        temp = (float)stemp / 100.0f;
+        payload.temp = int(((float)stemp / 10.0f) + 0.5);
 
         uint32_t shum = ((uint32_t)readbuffer[3] << 8) | readbuffer[4];
         shum = (625 * shum) >> 12;
-        humidity = (float)shum / 100.0f;
+        payload.humidity = byte(((float)shum / 100.0f) + 0.5);
 
-        // Add 0.5 as casting always rounds down
-        payload.temp = int((temp * 10) + 0.5);
-        payload.humidity = byte(humidity + 0.5);
         tempReadingValid = true;
       }
     }
@@ -109,8 +101,40 @@ void loop(void)
 
   if (counter == 0)
   {
-    payload.batteryLevel = getBandgap();
-    counter = 719;
+    // Do 5 reads and use median
+    voltageArray[0] = analogRead(A1);
+    voltageArray[1] = analogRead(A1);
+    voltageArray[2] = analogRead(A1);
+    voltageArray[3] = analogRead(A1);
+    voltageArray[4] = analogRead(A1);
+
+    // With 5 values, only need to identify first 3 to know median
+    for (byte i = 0; i <= 2; i++)
+    {
+      voltageInd[i] = 1;
+      for (byte j = 1; j <= 4; j++)
+      {
+
+        if (i == 0 && voltageArray[j] > voltageArray[voltageInd[i]])
+        {
+          voltageInd[i] = j;
+        }
+
+        else if (i == 1 && j != voltageInd[0] && voltageArray[j] > voltageArray[voltageInd[i]])
+        {
+          voltageInd[i] = j;
+        }
+
+        else if (i == 2 && j != voltageInd[0] && j != voltageInd[1] && voltageArray[j] > voltageArray[voltageInd[i]])
+        {
+          voltageInd[i] = j;
+        }
+      }
+    }
+
+
+    payload.batteryLevel = voltageArray[voltageInd[2]] * adcToVolt;
+    counter = 1439;
   }
   else
   {
@@ -118,7 +142,6 @@ void loop(void)
   }
 
   radio.powerUp();
-  // Send payload. This will block until complete
   radio.write( &payload, sizeof(payload) );
   radio.powerDown();
 
@@ -129,26 +152,11 @@ void loop(void)
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
-  LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
-
 }
 
 
 
-// Code courtesy of "Coding Badly" and "Retrolefty" from the Arduino forum
-// results are Vcc * 100
-// So for example, 5V would be 500.
-int getBandgap ()
-{
-  // REFS0 : Selects AVcc external reference
-  // MUX3 MUX2 MUX1 : Selects 1.1V (VBG)
-  ADMUX = bit (REFS0) | bit (MUX3) | bit (MUX2) | bit (MUX1);
-  ADCSRA |= bit( ADSC );  // start conversion
-  while (ADCSRA & bit (ADSC))
-  { }  // wait for conversion to complete
-  int results = (((InternalReferenceVoltage * 1024) / ADC) + 5) / 10;
-  return results;
-} // end of getBandgap
+
 
 
 
@@ -161,6 +169,7 @@ int getBandgap ()
 uint16_t readStatus(void) {
   writeCommand(0xF32D); /**< Read Out of Status Register */
 
+  uint8_t dataArray[3];
 
   size_t recv = Wire.requestFrom(0x44, sizeof(dataArray));
   if (recv != sizeof(dataArray)) {
@@ -173,44 +182,24 @@ uint16_t readStatus(void) {
   uint16_t stat = dataArray[0];
   stat <<= 8;
   stat |= dataArray[1];
-  // Serial.println(stat, HEX);
   return stat;
 }
 
 
 /**
    Internal function to perform and I2C write.
-
    @param cmd   The 16-bit command ID to send.
 */
-bool writeCommand(uint16_t command) {
+void writeCommand(uint16_t command) {
   uint8_t cmd[2];
 
   cmd[0] = command >> 8;
   cmd[1] = command & 0xFF;
 
   Wire.beginTransmission(0x44);
-
-
-
-  // Write the data
-  if (Wire.write(cmd, 2) != 2) {
-    return false;
-  }
-
-  if (Wire.endTransmission() == 0) {
-    return true;
-  } else {
-    return false;
-  }
+  Wire.write(cmd, 2);
+  Wire.endTransmission();
 }
-
-
-
-
-
-
-
 
 
 /**
@@ -245,3 +234,4 @@ static uint8_t crc8(const uint8_t *data, int len) {
   }
   return crc;
 }
+
