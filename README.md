@@ -28,8 +28,8 @@ Enable SPI for nrf chip: dtparam=spi=on
 Enable I2C for bme280 chip: dtparam=i2c_arm=on  
 
 ### Install git
-`sudo apt install git`
-`git clone http://github.com/tigertone/pi_weather_station`
+`sudo apt install git`  
+`git clone http://github.com/tigertone/pi_weather_station`  
 
 
 ### Setup service to disable HDMI port on boot 
@@ -66,10 +66,10 @@ humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID));`
 `create index by_date on dailyExtremes (sampledDate);`
 
 `CREATE USER 'database_writer'@'localhost';`  	
-`GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost';`  	
+`GRANT INSERT ON weatherLog.* TO 'database_writer'@'localhost';`  	
 `CREATE USER 'database_reader'@'localhost';`  	
-`GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost';`  
-`GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost';`  
+`GRANT SELECT ON weatherLog.* TO 'database_reader'@'localhost';`  
+`GRANT SELECT ON weatherLog.* TO 'database_writer'@'localhost';`  
 `FLUSH PRIVILEGES;`
 
 `quit;`
