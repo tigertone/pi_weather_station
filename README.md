@@ -27,10 +27,14 @@ Set gpu memory to 16mb as running headless: gpu_mem=16
 Enable SPI for nrf chip: dtparam=spi=on  
 Enable I2C for bme280 chip: dtparam=i2c_arm=on  
 
+### Install git
+`sudo apt install git`
+`git clone http://github.com/tigertone/pi_weather_station`
+
 
 ### Setup service to disable HDMI port on boot 
 `sudo cp disableHDMI.service /etc/systemd/system/disableHDMI.service`  
-`sudo systemctl enable weatherStation.service`  
+`sudo systemctl enable disableHDMI.service`  
 
 Can be tested with...
 
