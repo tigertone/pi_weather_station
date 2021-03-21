@@ -94,7 +94,7 @@ If updating etc get new version of code
 
 `sudo apt-get install python3-dev libboost-python-dev python3-setuptools python3-rpi.gpio`  
 `sudo ln -s $(ls /usr/lib/arm-linux-gnueabihf/libboost_python3-py3*.so | tail -1) /usr/lib/arm-linux-gnueabihf/libboost_python3.so`  
-`cd RF24-1.3.9/pyRF24/`  
+`cd pyRF24/`  
 `python3 setup.py build`  
 `sudo python3 setup.py install`  
 
