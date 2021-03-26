@@ -17,8 +17,8 @@ network={
 
 ### Change hostname 
 `sudo raspi-config`  
-Set to 'weather'
-website will then be available at http://weather.local
+Set to 'weather'  
+Website will then be available at http://weather.local
 
 ### Modify boot confit
 
