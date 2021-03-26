@@ -48,7 +48,9 @@ Can be tested with...
 
 then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...
 `sudo nano /etc/apache2/sites-available/000-default.conf`  
-`sudo nano /etc/apache2/apache2.conf`  
+`sudo nano /etc/apache2/apache2.conf` 
+
+In `/etc/apache2/apache2.conf` also change AllowOverride none to AllowOverride all and Options Indexes to Options-Indexes.
  
 
 ### Create databases
