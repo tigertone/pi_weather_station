@@ -15,6 +15,11 @@ network={
  psk="<Password for your wireless LAN>"
 }
 
+### Change hostname 
+`sudo raspi-config`  
+Set to 'weather'
+website will then be available at http://weather.local
+
 ### Modify boot confit
 
 `sudo nano /boot/config.txt`  
@@ -50,7 +55,7 @@ then change working directory for apache2 (/var/www/html to html folder of repo 
 `sudo nano /etc/apache2/sites-available/000-default.conf`  
 `sudo nano /etc/apache2/apache2.conf` 
 
-In `/etc/apache2/apache2.conf` also change AllowOverride none to AllowOverride all and Options Indexes to Options-Indexes.
+In `/etc/apache2/apache2.conf` also change AllowOverride none to AllowOverride all
  
 
 ### Create databases
@@ -111,17 +116,15 @@ If updating etc get new version of code
 `sudo systemctl enable weatherStation.service`  
 
 
-
-
 ### ToDo
-Don't initially display status page under current data
-Show error when there is no data, rather than NaNs/undefined's
-Status of internal sensor
-Align y axis on plots
+Don't initially display status page under current data  
+Show error when there is no data, rather than NaNs/undefined's  
+Status of internal sensor   
+Align y axis on plots  
 Annual data to timestamps  
-Test internal voltage level
+Test internal voltage level  
 Update to python code to latest RF24 library  
-Test lower powerup delays in arduino code
+Change name of weatherPortal.xxx files to portal.xxx
 
 
 ### Git
