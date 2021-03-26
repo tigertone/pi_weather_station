@@ -19,7 +19,7 @@ die( "Connection failed: " . mysqli_connect_error());
 //$queryFieldsInternal = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal");
 $queryFieldsInternal = array("ROUND(UNIX_TIMESTAMP(GMT)*1000) AS GMT_timestamp", "decidegreesInternal", "pressureInternal", "humidityInternal");
 $queryFieldsExternal = array("decidegreesExternal", "humidityExternal");
-$queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageTempSensor");
+$queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternalTempSensor");
 
 // Get most recent data
 if ($dataRange === "Current")
@@ -75,8 +75,7 @@ foreach ($queryFieldsAll as $fieldName)
 				$myArray[$fieldName] = NULL;
 			}
 		}
-		
-		
+
 
 //echo microtime(true) - $startTime;
 echo json_encode($myArray, JSON_NUMERIC_CHECK);

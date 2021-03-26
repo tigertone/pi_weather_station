@@ -2,7 +2,7 @@
 
 "short_name": "Weather",
 "name": "Pi Weather Station",
-"start_url": "/weatherPortal.php",
+"start_url": "/portal.php",
 "display": "standalone",
 "scope": "/",
 "background_color": "#FFFFFF",

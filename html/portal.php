@@ -10,8 +10,8 @@
 <link rel="stylesheet" type="text/css" href="weatherPortal.css"><meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="apple-touch-icon" sizes="180x180" href="icon_180x180.png">
 <link rel="apple-touch-icon" sizes="152x152" href="icon_152x152.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon_16x16.png" >  
-<link rel="icon" type="image/png" sizes="32x32" href="favicon_32x32.png" >  
+<link rel="icon" type="image/png" sizes="16x16" href="favicon_16x16.png" >
+<link rel="icon" type="image/png" sizes="32x32" href="favicon_32x32.png" >
 
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -33,7 +33,7 @@
 
     <div class="chartContainer" id="chartContainerID">
 	</div>
-	
+
 	<table class="summaryTable" id="currentTable" style="display: table">
 		<tr>
 			<td colspan ="5"><img src="icon_180x180.png" alt="Outdoor" style="display:block; margin-left:auto; margin-right:auto;height:2.5em; padding:1.5em"></td>
@@ -57,13 +57,13 @@
 		</tr>
 		<tr>
 			<td style="text-align:right">Temp: </td>
-			<td style="text-align:left"><span id="currentIntTempNow"></span></td>	
+			<td style="text-align:left"><span id="currentIntTempNow"></span></td>
 			<td style="text-align:right">(<span id="currentIntTempLow"></span></td>
 			<td style="text-align:center"> | </td>
 			<td style="text-align:left"><span id="currentIntTempHigh"></span>)</td></tr>
 		<tr>
 			<td style="text-align:right">Humidity: </td>
-			<td style="text-align:left"><span id="currentIntHumNow"></span></td>		
+			<td style="text-align:left"><span id="currentIntHumNow"></span></td>
 			<td style="text-align:right">(<span id="currentIntHumLow"></span></td>
 			<td style="text-align:center"> | </td>
 			<td style="text-align:left"><span id="currentIntHumHigh"></span>)</td></tr>
@@ -73,7 +73,7 @@
 			<td colspan ="3" style="text-align:center">(<span id="currentIntPressTrend"></span>)</td>
 		</tr>
 		</table>
-		
+
 
     <table class="summaryTable" id="statusTable" style="display: table">
 
@@ -93,8 +93,7 @@
 			<td style="text-align:right">Disk space remaining:</td>
 			<td style="text-align:left"><span id="statusSpaceMb"></span> (<span id="statusSpacePercent"></span>)</td>
 		</tr>
-		
-		
+
     </table>
 
     <script src="/chartJs_3.0.0/chart.js"></script>

@@ -29,30 +29,18 @@ die( "Connection failed: " . mysqli_connect_error());
 $result_sensorData=mysqli_query($conn, "SELECT COUNT(decidegreesInternal) as decidegreesInternal, COUNT(decidegreesExternal) as decidegreesExternal FROM sensorData WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 70 SECOND)") or die(mysqli_error($conn));
 $result_percentSuccessTemp=mysqli_query($conn, "SELECT ROUND(COUNT(decidegreesExternal)/60*100,0) as percentSuccess FROM sensorData WHERE GMT > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)") or die(mysqli_error($conn));
 
-$voltage_fname = "/home/pi/pi_weather_station/weatherTmp/voltage.txt";
-if (file_exists($voltage_fname))
-{
-	$fid = fopen($voltage_fname,"r") or die("unable to open the temporary file voltage.txt");
-    $dataOut->voltage1 = intval(fread($fid, filesize($voltage_fname)));
-    fclose($fid);
-}
-else
-{
-    $result_voltage1=mysqli_query($conn, "SELECT voltageTempSensor FROM dailyExtremes WHERE voltageTempSensor IS NOT NULL ORDER BY id desc LIMIT 1") or die(mysqli_error($conn));
-    
-    if (mysqli_num_rows($result_voltage1)!=0)
+$result_voltageExternalTempSensor=mysqli_query($conn, "SELECT voltageExternalTempSensor FROM dailyExtremes WHERE voltageExternalTempSensor IS NOT NULL ORDER BY id desc LIMIT 1") or die(mysqli_error($conn));
+
+    if (mysqli_num_rows($result_voltageExternalTempSensor)!=0)
 	{
-	
-	    $voltage1 = mysqli_fetch_all($result_voltage1,MYSQLI_ASSOC);
-	    $dataOut->voltage1 = $voltage1[0]['voltageTempSensor'];
-	    
+	    $voltageExternalTempSensor = mysqli_fetch_all($result_voltageExternalTempSensor,MYSQLI_ASSOC);
+	    $dataOut->voltageExternalTempSensor = $voltageExternalTempSensor[0]['voltageExternalTempSensor'];
 	}
-	else 
+	else
 	{
-	    $dataOut->voltage1 = NULL;
+	    $dataOut->voltageExternalTempSensor = 0;
 	}
-	
-}
+
 
 
 if (mysqli_num_rows($result_sensorData)!=0)
@@ -92,7 +80,7 @@ if (mysqli_num_rows($result_percentSuccessTemp)!=0)
 
     $percentSuccessTemp = mysqli_fetch_all($result_percentSuccessTemp,MYSQLI_ASSOC);
     $dataOut->percentSuccessTemp = $percentSuccessTemp[0]['percentSuccess'];
-    
+
 }
 else
 {

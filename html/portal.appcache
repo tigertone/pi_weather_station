@@ -1,15 +1,15 @@
 CACHE MANIFEST
-# 13-11-2020:v1
+# 26-03-2021 v3
 
 # Explicitly cached 'master entries'.
 CACHE:
 favicon_16x16.png
 favicon_32x32.png
-weatherPortal.php
+portal.php
 getData.php
 getStatus.php
-weatherPortal.css
-weatherPortal.js
+portal.css
+portal.js
 manifest.json
 chartJs_3.0.0/chart.min.js
 chartjs-adapter-date-fns/chartjs-adapter-date-fns.bundle.min.js

@@ -39,10 +39,10 @@ function selectTab(evt, tabName)
 	{
 		tablinks[i].className = tablinks[i].className.replace(" active", "");
 	}
-	
+
 	evt.currentTarget.className += " active";
 	xmlhttp = new XMLHttpRequest();
-	xmlhttp.onload = function() 
+	xmlhttp.onload = function()
 	{
 			returnedData = JSON.parse(xmlhttp.responseText);
 
@@ -51,7 +51,7 @@ function selectTab(evt, tabName)
 				if (tabName == 'Current')
 				{
 					toPlot1 = [];
-					
+
 					document.getElementById("chartContainerID").style.display = "none";
 					document.getElementById("currentTable").style.display = "table";
 					document.getElementById("statusTable").style.display = "none";
@@ -69,71 +69,66 @@ function selectTab(evt, tabName)
 					document.getElementById("currentIntHumHigh").textContent = returnedData.humidityInternalHigh;
 					document.getElementById("currentIntPressNow").textContent = returnedData.pressureInternal + "mBar";
 					document.getElementById("currentIntPressTrend").textContent = returnedData.pressureInternalTrend;
-					
-					
-					
+
 				}
 				else if (tabName == 'Today')
 				{
-					
 					currentDate = new Date();
 					xAxesEnd = currentDate.getTime();
 					xAxesStart = new Date(currentDate.setDate(currentDate.getDate() - 1));
-					
 					timeUnit = 'hour';
-					
+
 					xData = returnedData.GMT_timestamp;
 
 					toPlot1 = ['decidegreesExternal', 'pressureNull',     'humidityExternal'];
 					toPlot2 = ['decidegreesInternal', 'pressureInternal', 'humidityInternal'];
 					legendStr = ['Temp (°C)',         'Pressure (mbar)',  'Humidity (%)'];
-					
+
 					data1Colour = 'rgba(15,170,10,1)';
 					data2Colour = 'rgba(150, 150, 150, 1)';
-									
-				} 
+
+				}
 				else if (tabName == 'Annual')
 				{
-				
+
 					currentDate = new Date();
 					xAxesEnd = currentDate.getTime();
 					xAxesStart = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1)).getTime();
-					
+
 					timeUnit = 'month';
 
 					xData = returnedData.sampledDate.map(item=>{return new Date(item).getTime()});
-										
-					toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternal1'];
+
+					toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternalTempSensor'];
 					toPlot2 = ['decidegreesExternalLow',  'decidegreesInternalLow',  'humidityExternalLow',  'humidityInternalLow',  'pressureInternalLow',  ''];
 					legendStr = ['External temp (°C)',    'Internal temp (°C)',      'External humidity (%)','Internal humidity (%)','Internal pressure (mbar)', 'External voltage (V)'];
-					
+
 					data1Colour = 'rgba(255,40,40,1)';
 					data2Colour = 'rgba(30, 144, 255, 1)';
-					
+
 				}
-				
+
 				if (tabName == 'Status')
 				{
 					toPlot1 = [];
-					
+
 					document.getElementById("chartContainerID").style.display = "none";
 					document.getElementById("currentTable").style.display = "none";
 					document.getElementById("statusTable").style.display = "table";
-					
+
 					getStatus();
 					statusUpdateTimer = setInterval(getStatus, 10000);
-					
-				}
-				
-				
-				mydiv = document.getElementById('chartContainerID');
-								
-				while (mydiv.firstChild) 
-				{
-					mydiv.removeChild(mydiv.firstChild);	
+
 				}
 
-				
+				mydiv = document.getElementById('chartContainerID');
+
+				while (mydiv.firstChild)
+				{
+					mydiv.removeChild(mydiv.firstChild);
+				}
+
+
 				for (i=0; i<toPlot1.length; i++)
 				{
 
@@ -151,13 +146,10 @@ function selectTab(evt, tabName)
 					div.appendChild(canvas);
 				}
 
-					
-					
-					
-					//document.querySelector('.chartContainer').appendChild(div);
-		
+
+
 		for (i=0; i<toPlot1.length; i++)
-				{		
+				{
 					if (toPlot1[i].startsWith('pressure'))
 					{
 						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, timeUnit, 925, 1050, legendStr[i], data1Colour, data2Colour));
@@ -165,25 +157,19 @@ function selectTab(evt, tabName)
 					else if (toPlot1[i].startsWith('decidegrees'))
 					{
 						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), returnedData[toPlot2[i]].map(function(x) { if (x!=null) {return x / 10} return null }), xAxesStart, xAxesEnd, timeUnit, -10, 30, legendStr[i], data1Colour, data2Colour));               
-					} 
+					}
 					else if (toPlot1[i].startsWith('humidity'))
 					{
 						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]], returnedData[toPlot2[i]], xAxesStart, xAxesEnd, timeUnit, 0, 100, legendStr[i], data1Colour, data2Colour));
 					}
 					else if (toPlot1[i].startsWith('voltage'))
 					{
-						//dataParsed = new Array(xData.length);
-						//for (j=0; j<xData.length; j++){
-							//dataParsed[j] = {x:xData[j],y:returnedData[toPlot1[i]][j]}
-						//}
-
-						// new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 10} return null }), [], xAxesStart, xAxesEnd, timeUnit, 0, 4, legendStr[i], data1Colour, data2Colour));
-
-					}             	
+						new Chart(mydiv.childNodes[i].firstChild.getContext('2d'), createConfig(xData, returnedData[toPlot1[i]].map(function(x) { if (x!=null) {return x / 100} return null }), [], xAxesStart, xAxesEnd, timeUnit, 2, 5, legendStr[i], data1Colour, data2Colour));
+					}
 				}
 			}
 	}
-						
+
 	xmlhttp.open("GET", "getData.php?dataRange=" + tabName, true);
 	xmlhttp.send();
 
@@ -258,33 +244,34 @@ function getStatus()
 	var xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function()
 	{
-		if (this.readyState == 4 && this.status == 200) 
+		if (this.readyState == 4 && this.status == 200)
 		{
 			samplingStatus = JSON.parse(xhttp.responseText);
 			if (samplingStatus.internalSampling == 1)
 			{
 				document.getElementById("statusInternal").textContent = "OK";
-//                        statusIconInternalElement.style.backgroundColor = "#94E185";
 			}
-			else if (samplingStatus.internalSampling == 0)
+			else
 			{
-				document.getElementById("statusInternal").textContent = "OK";
-//                        statusIconInternalElement.style.backgroundColor = "#C9404D";
+				document.getElementById("statusInternal").textContent = "No Data";
 			}
 
 			if (samplingStatus.externalSampling == 1)
 			{
 				document.getElementById("statusExternal").textContent = "OK";
-//                        statusIconExternalElement.style.backgroundColor = "#94E185";
 			}
-			else if (samplingStatus.externalSampling == 0)
+			else
 			{
 				document.getElementById("statusExternal").textContent = "No recent data";
-			//                        statusIconExternalElement.style.backgroundColor = "#C9404D";
 			}
-			document.getElementById("statusVoltageExternal").textContent = (samplingStatus.voltage1/10) + "v";
-			// Temp code as electronics aren't functional
-			document.getElementById("statusVoltageExternal").textContent = "xxx";
+			if (samplingStatus.voltageExternalTempSensor == 0)
+                        {
+                                document.getElementById("statusVoltageExternal").textContent = "No Data";
+                        }
+                        else
+                        {
+				document.getElementById("statusVoltageExternal").textContent = (samplingStatus.voltageExternalTempSensor/100).toFixed(2) + "v";
+                        }
 			document.getElementById("statusPercentExternal").textContent = samplingStatus.percentSuccessTemp + "%";
 			document.getElementById("statusSpaceMb").textContent = samplingStatus.spaceRemainingMb + "MB";
 			document.getElementById("statusSpacePercent").textContent = samplingStatus.spaceRemainingPercent + "%";

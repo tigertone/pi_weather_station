@@ -12,6 +12,8 @@ from struct import *
 from smbus import SMBus
 from bme280 import BME280
 
+
+
 # Print information to command line as the program executes
 verbose = True
 
@@ -24,24 +26,23 @@ except Exception as e:
 	print('Internal sensor malfuntion')
 	sensorInternal = False
 
-# Setup for GPIO 
+# Setup for GPIO
 radio = RF24(22, 0)
 
 
 ##########################################
-pipes = [0xF0F0F0F0E1];
 
 # Set parameters for nrf radio
 sensorExternal = radio.begin();
 radio.setPALevel(RF24_PA_MAX,1);
 radio.setDataRate(RF24_250KBPS);
 radio.setChannel(80);
-radio.payloadSize = 3;
+radio.payloadSize = 5;
 if verbose:
 	radio.printDetails()
 
 # Begin to listen for new external data
-radio.openReadingPipe(1,pipes[0])
+radio.openReadingPipe(1,b'\xe1\xf0\xf0\xf0\xf0')
 radio.startListening()
 
 # Identify start time so that we can loop the code every 60s
@@ -67,8 +68,8 @@ while True:
 	humidityInternal = None
 	decidegreesExternal = None
 	humidityExternal = None
-	voltageExternal1 = None
-	
+	voltageExternalTempSensor = None
+
 	# If there is a functional sensor, then read the current values
 	if sensorInternal:
 		if verbose:
@@ -84,28 +85,23 @@ while True:
 	if sensorExternal and radio.available():
 		if verbose:
 			print("\nReading external sensor")
-	
 		while radio.available():
-			len = radio.getDynamicPayloadSize()
-			receive_payload = radio.read(len)
-			#voltageExternal1 = receive_payload[0]
-			voltageExternal1 = None
+			receive_payload = radio.read(radio.payloadSize)
 			decidegreesExternal = unpack('h',receive_payload[0:2])
 			decidegreesExternal = int(decidegreesExternal[0])
 			humidityExternal = receive_payload[2]
-			#if 'voltageCurrent' in locals():
-				#if voltageCurrent != voltageExternal1:
-					#with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
-						#fileToWrite.write(str(voltageCurrent)+"\n")
-			#else:
-				#voltageCurrent = voltageExternal1
-				#with open('/home/pi/pi_weather_station/weatherTmp/voltage.txt',"w") as fileToWrite:
-					#fileToWrite.write(str(voltageCurrent)+"\n")
-			
+			voltageExternalTempSensor = unpack('h',receive_payload[3:5])
+			voltageExternalTempSensor = int(voltageExternalTempSensor[0])
+
 			# These values are sent when the external sensor is malfunctioning - Reset variables to None
 			if (decidegreesExternal == 100) and (humidityExternal == 255):
 				decidegreesExternal = None
 				humidityExternal = None
+
+			if verbose:
+				print(decidegreesExternal)
+				print(humidityExternal)
+				print(voltageExternalTempSensor)
 
 	# Connect to MySQL
 	try:
@@ -113,47 +109,10 @@ while True:
 		cur = db.cursor()
 		if verbose:
 			print("\nConnected to database")
-	
-	# If connection is not successful 
-	except: 
-		print("\nCan't connect to database") 
 
-	# If there has been a gap since the last data point, insert a row with null values in both tables so that chartjs won't join the gaps
-	try:
-
-		query = """SELECT GMT FROM sensorData order by id desc limit 1;"""
-		cur.execute(query)
-
-		if cur.rowcount>0:
-			results = cur.fetchone()
-			if (local_datetime - results[0]).seconds > 120:
-				newDatetime = local_datetime - timedelta(minutes=1)
-				query = "INSERT INTO sensorData (GMT) VALUES('{0}')".format(newDatetime.strftime("%Y-%m-%d %H:%M:%S"))
-				if verbose:
-					print("\nInserting dummy row into sensorData...")
-					print(query)
-				cur.execute(query)
-				db.commit()
-
-
-		query = "SELECT sampledDate FROM dailyExtremes order by id desc limit 1"
-		cur.execute(query)
-
-		if cur.rowcount>0:
-			results = cur.fetchone()
-			if (local_datetime.date() - results[0]).days >= 2:
-				newDatetime = local_datetime - timedelta(days=1)
-				query = "INSERT INTO dailyExtremes (sampledDate) VALUES('{0}')".format(newDatetime.strftime("%Y-%m-%d"))
-				if verbose:
-					print("\nInserting dummy row into dailyExtremes...")
-					print(query)
-				cur.execute(query)
-				db.commit()
-				
-	except Exception as e:
-		print("Failed to insert dummy rows into database!")
-		print(e)
-		db.rollback()
+	# If connection is not successful
+	except:
+		print("\nCan't connect to database")
 
 	# Add a new row into the database with the current data
 	try:
@@ -163,21 +122,21 @@ while True:
 			print(*query)
 		cur.execute(*query)
 		db.commit()
-		
+
 	except Exception as e:
 		print("Failed to insert new row into sensorData!")
 		print(e)
 		db.rollback()
 
-		
+
 	# Test if current values are new extremes. If so update db
 	# Get current extreme values
-	query = "SELECT ID, sampledDate, decidegreesInternalHigh, decidegreesInternalLow, humidityInternalHigh, humidityInternalLow, pressureInternalHigh, pressureInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh, humidityExternalLow, voltageTempSensor FROM dailyExtremes WHERE sampledDate = '{0}'".format(local_date)
+	query = "SELECT ID, sampledDate, decidegreesInternalHigh, decidegreesInternalLow, humidityInternalHigh, humidityInternalLow, pressureInternalHigh, pressureInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh, humidityExternalLow, voltageExternalTempSensor FROM dailyExtremes WHERE sampledDate = '{0}'".format(local_date)
 	if verbose:
 		print("\nExtracting current data from dailyExtremes...")
 		print(query)
 	cur.execute(query)
-	
+
 	# If there is any data, extract the variables
 	try:
 		if cur.rowcount>0:
@@ -194,19 +153,20 @@ while True:
 			decidegreesExternalLow = results[9]
 			humidityExternalHigh = results[10]
 			humidityExternalLow = results[11]
-			voltageExternal1High = results[12]
-			
+			voltageExternalTempSensorHigh = results[12]
+
 			# Create a new query and append any values where there are new extremes
 			query = ""
 			for sensorVariable in sensorVariableNames:
-				if eval(sensorVariable) is not None	:					
+				if eval(sensorVariable) is not None:
 					if eval(sensorVariable + "Low") is None or eval(sensorVariable) < eval(sensorVariable + "Low"):
 						query = query + sensorVariable + "Low = " + str(eval(sensorVariable)) + ", "
 					if eval(sensorVariable + "High") is None or eval(sensorVariable) > eval(sensorVariable + "High"):
 						query = query + sensorVariable + "High = " + str(eval(sensorVariable)) + ", "
-			#if voltageExternal1 is None or voltageExternal1 > voltageExternal1High:
-				#query = query + "voltageExternal1 = " + str(voltageExternal1) + " "
-			
+			if voltageExternalTempSensor is not None:
+				if voltageExternalTempSensorHigh is None or voltageExternalTempSensor > voltageExternalTempSensorHigh:
+					query = query + "voltageExternalTempSensor = " + str(voltageExternalTempSensor) + ", "
+
 			# If there is any new data...
 			if query:
 				# Complete & execute query
@@ -215,17 +175,17 @@ while True:
 					print("\nUpdating dailyExtremes...")
 					print(query)
 				cur.execute(query)
-				db.commit()	
-				
+				db.commit()
+
 		# Otherwise must be a new day, so insert all the current values
 		else:
-			query = """INSERT INTO dailyExtremes (sampledDate,decidegreesInternalHigh,decidegreesInternalLow,pressureInternalHigh,pressureInternalLow,humidityInternalHigh,humidityInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh,humidityExternalLow,voltageTempSensor) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(local_date,decidegreesInternal,decidegreesInternal,pressureInternal,pressureInternal,humidityInternal,humidityInternal, decidegreesExternal, decidegreesExternal, humidityExternal, humidityExternal, voltageExternal1)
+			query = """INSERT INTO dailyExtremes (sampledDate,decidegreesInternalHigh,decidegreesInternalLow,pressureInternalHigh,pressureInternalLow,humidityInternalHigh,humidityInternalLow, decidegreesExternalHigh, decidegreesExternalLow, humidityExternalHigh,humidityExternalLow,voltageExternalTempSensor) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(local_date,decidegreesInternal,decidegreesInternal,pressureInternal,pressureInternal,humidityInternal,humidityInternal, decidegreesExternal, decidegreesExternal, humidityExternal, humidityExternal, voltageExternalTempSensor)
 			if verbose:
 				print("\nNew day - inserting new extremes...")
 				print(query)
 			cur.execute(*query)
 			db.commit()
-			
+
 	except Exception as e:
 		print("Failed to update dailyExtremes!")
 		print(e)
@@ -233,7 +193,7 @@ while True:
 
 	# Close db connection until next time
 	db.close()
-	
+
 	# Sleep until 60s have elapsed since beginning of last loop
 	time.sleep(60.0 - ((time.time() - starttime)) %60.0)
 
