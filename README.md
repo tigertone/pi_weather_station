@@ -15,6 +15,11 @@ network={
  psk="<Password for your wireless LAN>"
 }
 
+### Change hostname 
+`sudo raspi-config`  
+Set to 'weather'  
+Website will then be available at http://weather.local
+
 ### Modify boot confit
 
 `sudo nano /boot/config.txt`  
@@ -27,10 +32,14 @@ Set gpu memory to 16mb as running headless: gpu_mem=16
 Enable SPI for nrf chip: dtparam=spi=on  
 Enable I2C for bme280 chip: dtparam=i2c_arm=on  
 
+### Install git
+`sudo apt install git`  
+`git clone http://github.com/tigertone/pi_weather_station`  
+
 
 ### Setup service to disable HDMI port on boot 
 `sudo cp disableHDMI.service /etc/systemd/system/disableHDMI.service`  
-`sudo systemctl enable weatherStation.service`  
+`sudo systemctl enable disableHDMI.service`  
 
 Can be tested with...
 
@@ -44,7 +53,9 @@ Can be tested with...
 
 then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...
 `sudo nano /etc/apache2/sites-available/000-default.conf`  
-`sudo nano /etc/apache2/apache2.conf`  
+`sudo nano /etc/apache2/apache2.conf` 
+
+In `/etc/apache2/apache2.conf` also change AllowOverride none to AllowOverride all
  
 
 ### Create databases
@@ -57,15 +68,15 @@ humidityExternal TINYINT UNSIGNED, PRIMARY KEY (ID));`
 
 `create index by_GMT on sensorData (GMT);`
 
-`CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesInternalLow SMALLINT, decidegreesInternalHigh SMALLINT, pressureInternalLow SMALLINT UNSIGNED, pressureInternalHigh SMALLINT UNSIGNED, humidityInternalLow TINYINT UNSIGNED, humidityInternalHigh TINYINT UNSIGNED, decidegreesExternalLow SMALLINT, decidegreesExternalHigh SMALLINT, humidityExternalLow TINYINT UNSIGNED, humidityExternalHigh TINYINT UNSIGNED, voltageTempSensor SMALLINT, PRIMARY KEY(ID));`
+`CREATE TABLE dailyExtremes(ID MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT, sampledDate DATE NOT NULL, decidegreesInternalLow SMALLINT, decidegreesInternalHigh SMALLINT, pressureInternalLow SMALLINT UNSIGNED, pressureInternalHigh SMALLINT UNSIGNED, humidityInternalLow TINYINT UNSIGNED, humidityInternalHigh TINYINT UNSIGNED, decidegreesExternalLow SMALLINT, decidegreesExternalHigh SMALLINT, humidityExternalLow TINYINT UNSIGNED, humidityExternalHigh TINYINT UNSIGNED, voltageExternalTempSensor SMALLINT, PRIMARY KEY(ID));`
 
 `create index by_date on dailyExtremes (sampledDate);`
 
 `CREATE USER 'database_writer'@'localhost';`  	
-`GRANT INSERT ON weather_records.* TO 'database_writer'@'localhost';`  	
+`GRANT INSERT ON weatherLog.* TO 'database_writer'@'localhost';`  	
 `CREATE USER 'database_reader'@'localhost';`  	
-`GRANT SELECT ON weather_records.* TO 'database_reader'@'localhost';`  
-`GRANT SELECT ON weather_records.* TO 'database_writer'@'localhost';`  
+`GRANT SELECT ON weatherLog.* TO 'database_reader'@'localhost';`  
+`GRANT SELECT ON weatherLog.* TO 'database_writer'@'localhost';`  
 `FLUSH PRIVILEGES;`
 
 `quit;`
@@ -90,7 +101,7 @@ If updating etc get new version of code
 
 `sudo apt-get install python3-dev libboost-python-dev python3-setuptools python3-rpi.gpio`  
 `sudo ln -s $(ls /usr/lib/arm-linux-gnueabihf/libboost_python3-py3*.so | tail -1) /usr/lib/arm-linux-gnueabihf/libboost_python3.so`  
-`cd RF24-1.3.9/pyRF24/`  
+`cd pyRF24/`  
 `python3 setup.py build`  
 `sudo python3 setup.py install`  
 
@@ -105,17 +116,15 @@ If updating etc get new version of code
 `sudo systemctl enable weatherStation.service`  
 
 
-
-
 ### ToDo
-Don't initially display status page under current data
-Show error when there is no data, rather than NaNs/undefined's
-Status of internal sensor
-Align y axis on plots
+Don't initially display status page under current data  
+Show error when there is no data, rather than NaNs/undefined's  
+Status of internal sensor   
+Align y axis on plots  
 Annual data to timestamps  
-Test internal voltage level
+Test internal voltage level  
 Update to python code to latest RF24 library  
-Test lower powerup delays in arduino code
+Change name of weatherPortal.xxx files to portal.xxx
 
 
 ### Git
