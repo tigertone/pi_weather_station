@@ -118,13 +118,9 @@ If updating etc get new version of code
 
 ### ToDo
 Don't initially display status page under current data  
-Show error when there is no data, rather than NaNs/undefined's  
-Status of internal sensor   
-Align y axis on plots  
-Annual data to timestamps  
-Test internal voltage level  
+Show error when there is no data, rather than NaNs/undefined's     
+Align y axis on plots   
 Update to python code to latest RF24 library  
-Change name of weatherPortal.xxx files to portal.xxx
 
 
 ### Git
