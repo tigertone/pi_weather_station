@@ -117,7 +117,6 @@ If updating etc get new version of code
 
 
 ### ToDo
-Don't initially display status page under current data  
 Show error when there is no data, rather than NaNs/undefined's     
 Align y axis on plots   
 Update to python code to latest RF24 library  
