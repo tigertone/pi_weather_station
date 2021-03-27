@@ -75,7 +75,7 @@
 		</table>
 
 
-    <table class="summaryTable" id="statusTable" style="display: table">
+    <table class="summaryTable" id="statusTable" style="display: none">
 
         <tr>
         	<td style="text-align:right">Internal status:</td>
