@@ -97,7 +97,7 @@ function selectTab(evt, tabName)
 
 					timeUnit = 'month';
 
-					xData = returnedData.sampledDate.map(item=>{return new Date(item).getTime()});
+					xData = returnedData.sampledDate_timestamp;
 
 					toPlot1 = ['decidegreesExternalHigh', 'decidegreesInternalHigh', 'humidityExternalHigh', 'humidityInternalHigh', 'pressureInternalHigh', 'voltageExternalTempSensor'];
 					toPlot2 = ['decidegreesExternalLow',  'decidegreesInternalLow',  'humidityExternalLow',  'humidityInternalLow',  'pressureInternalLow',  ''];

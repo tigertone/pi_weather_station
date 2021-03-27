@@ -19,7 +19,7 @@ die( "Connection failed: " . mysqli_connect_error());
 //$queryFieldsInternal = array("GMT", "decidegreesInternal", "pressureInternal", "humidityInternal");
 $queryFieldsInternal = array("ROUND(UNIX_TIMESTAMP(GMT)*1000) AS GMT_timestamp", "decidegreesInternal", "pressureInternal", "humidityInternal");
 $queryFieldsExternal = array("decidegreesExternal", "humidityExternal");
-$queryFieldsExtremes = array("sampledDate","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternalTempSensor");
+$queryFieldsExtremes = array("ROUND(UNIX_TIMESTAMP(sampledDate)*1000) AS sampledDate_timestamp","decidegreesInternalHigh","decidegreesInternalLow","pressureInternalHigh","pressureInternalLow","humidityInternalHigh","humidityInternalLow", "decidegreesExternalHigh", "decidegreesExternalLow", "humidityExternalHigh", "humidityExternalLow", "voltageExternalTempSensor");
 
 // Get most recent data
 if ($dataRange === "Current")
@@ -47,6 +47,7 @@ $myArray= array();
 
 
 $queryFieldsAll = str_replace("ROUND(UNIX_TIMESTAMP(GMT)*1000) AS GMT_timestamp","GMT_timestamp",$queryFieldsAll);
+$queryFieldsAll = str_replace("ROUND(UNIX_TIMESTAMP(sampledDate)*1000) AS sampledDate_timestamp","sampledDate_timestamp",$queryFieldsAll);
 
 
 foreach ($sqlQueries as $query)
