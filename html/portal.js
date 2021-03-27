@@ -16,8 +16,7 @@ Chart.defaults.elements.line.borderCapStyle = 'round';
 Chart.defaults.elements.line.tension = 0;
 Chart.defaults.elements.line.pointBorderWidth = 2;
 
-Chart.defaults.line.showLines = true;
-Chart.defaults.line.spanGaps = false;
+Chart.overrides.line.spanGaps = false;
 Chart.defaults.elements.point.radius = 0;
 Chart.defaults.fontSize = 8;
 Chart.defaults.events = [];
@@ -208,10 +207,11 @@ function createConfig(xData, yData1, yData2, xmin, xmax, timeUnit, ymin, ymax, y
 			scales:
 			{
 				x:
-				{max:xmax,
-min:xmin,				
-				type: 'time',
-                time: 
+				{
+					max:xmax,
+					min:xmin,
+					type: 'time',
+                			time:
 					{
 						unit: timeUnit,
 						displayFormats:
@@ -231,7 +231,7 @@ min:xmin,
 						display: true,
 						labelString: yLabel
 					}
-				}
+				},
 			},
 		}
 	}
