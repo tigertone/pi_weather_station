@@ -51,11 +51,45 @@ Can be tested with...
 `sudo apt-get install python3-mysqldb`  
 `sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli`  
 
-then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...
+then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...  
 `sudo nano /etc/apache2/sites-available/000-default.conf`  
 `sudo nano /etc/apache2/apache2.conf` 
 
+`sudo nano /etc/apache2/sites-available/000-default.conf` contains the following...  
+
+`<VirtualHost *:80>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /home/pi/pi_weather_station/html
+        Redirect permanent / https://weather.local/
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+\</VirtualHost>
+
+<VirtualHost *:443>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /home/pi/pi_weather_station/html
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+        SSLEngine on
+        SSLCertificateKeyFile /home/pi/localhost-privkey.pem
+        SSLCertificateFile /home/pi/localhost-cert.pem
+        SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+        Protocols h2 http/1.1
+
+\</VirtualHost>`
+
 In `/etc/apache2/apache2.conf` also change AllowOverride none to AllowOverride all
+
+
+Generate certificate 
+`cd`  
+`openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' -keyout weather-privkey.pem -out weather-cert.pem`
  
 
 ### Create databases
