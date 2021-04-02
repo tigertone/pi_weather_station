@@ -51,6 +51,16 @@ Can be tested with...
 `sudo apt-get install python3-mysqldb`  
 `sudo apt-get install apache2 libapache2-mod-php php7.3-mysqli`  
 
+Enable http/2...
+
+`sudo apt install php7.3-fpm`  
+`sudo a2enmod proxy_fcgi setenvif`  
+`sudo a2enconf php7.3-fpm`  
+`sudo a2dismod php7.3`  
+`sudo a2dismod mpm_prefork`   
+`sudo a2enmod mpm_event`  
+`sudo service apache2 restart && sudo service php7.3-fpm restart`  
+
 then change working directory for apache2 (/var/www/html to html folder of repo i.e. /home/pi/pi_weather_station/html) in 2 locations...  
 `sudo nano /etc/apache2/sites-available/000-default.conf`  
 `sudo nano /etc/apache2/apache2.conf` 
@@ -89,7 +99,12 @@ In `/etc/apache2/apache2.conf` also change AllowOverride none to AllowOverride a
 
 Generate certificate 
 `cd`  
-`openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' -keyout weather-privkey.pem -out weather-cert.pem`
+`openssl req -x509 -nodes -new -sha256 -days 1024 -newkey rsa:2048 -keyout weather_CA.key -out weather_CA.pem -subj "/C=UK/CN=weather_CA"`  
+`openssl x509 -outform pem -in weather_CA.pem -out weather_CA.crt`  
+
+`openssl req -new -nodes -newkey rsa:2048 -keyout weather.key -out weather.csr -subj "/C=UK/CN=localhost.local"`  
+`openssl x509 -req -sha256 -days 1024 -in localhost.csr -CA weather_CA.pem -CAkey weather_CA.key -CAcreateserial -extfile pi_weather_station/domains.ext -out localhost.crt`  
+
  
 
 ### Create databases
